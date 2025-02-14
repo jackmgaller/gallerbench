@@ -79,7 +79,7 @@ if (false) {
 	console.log(run.winner);
 }
 
-if (true) {
+if (false) {
 	const run = await multiplayerGameLoop(
 		connect4Game,
 		[

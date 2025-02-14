@@ -132,19 +132,12 @@ export class OpenAIModel extends LanguageModel {
  * @extends OpenAIModel
  */
 export class OpenAIReasoningModel extends OpenAIModel {
-	public readonly defaultReasoningEffort?: "low" | "medium" | "high";
-
 	constructor(
-		name: string, // no public modifier here
-		defaultReasoningEffort?: "low" | "medium" | "high",
+		public readonly name: string,
+		public readonly defaultReasoningEffort?: "low" | "medium" | "high",
 	) {
-		// Modify the name as desired here:
-		super(
-			name + (defaultReasoningEffort ? " " + defaultReasoningEffort : ""),
-		);
-		this.defaultReasoningEffort = defaultReasoningEffort;
+		super(name);
 	}
-
 	/**
 	 * Sends a request to OpenAI's API to complete a chat with reasoning options.
 	 *
