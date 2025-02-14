@@ -109,6 +109,7 @@ export const ticTacToeGame: MultiplayerGame<TicTacToeState> = {
 		"You are judging an AI competition of two AI's playing tic tac toe. You need to determine what move they have made. You will return one of the following strings: top left, top center, top right, middle left, middle center, middle right, bottom left, bottom middle, bottom right. If you return anything else, the program will break. Do not return any special characters surrounding the string.",
 	players: 2,
 	version: 1.1,
+	initializeState: initializeTicTacToeState,
 	updateState: (state: TicTacToeState, parsedAnswer: string) => {
 		// Determine the current player's symbol
 		const currentPlayer = state.turn % 2 === 0

@@ -13,20 +13,6 @@ export interface AidanBenchState {
 	score: number;
 }
 
-/**
- * Creates a new AidanBench state.
- *
- * @param question - The open‑ended question for the benchmark.
- * @returns An AidanBenchState object.
- */
-export function initializeAidanBenchState(question: string): AidanBenchState {
-	return {
-		question,
-		responses: [],
-		score: 0,
-	};
-}
-
 // ------------------------
 // Helper: Cosine Similarity
 // ------------------------
@@ -47,25 +33,42 @@ function cosineSimilarity(a: number[], b: number[]): number {
 // Uses OpenAI's embedding endpoint.
 // (Ensure that the OPENAI_API_KEY environment variable is set.)
 
+// At the top of the file, add a cache for embeddings:
+const embeddingCache = new Map<string, number[]>();
+
 export async function computeEmbedding(text: string): Promise<number[]> {
-	const apiKey = Deno.env.get("OPENAI_API_KEY");
-	if (!apiKey) throw new Error("Missing OPENAI_API_KEY");
-	const response = await fetch("https://api.openai.com/v1/embeddings", {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-			"Authorization": `Bearer ${apiKey}`,
-		},
-		body: JSON.stringify({
-			model: "text-embedding-ada-002",
-			input: text,
-		}),
-	});
-	const json = await response.json();
-	if (!json.data || !json.data[0] || !json.data[0].embedding) {
-		throw new Error("Embedding API error:" + JSON.stringify(json));
-	}
-	return json.data[0].embedding;
+  // Check if the embedding for this text is already cached.
+  if (embeddingCache.has(text)) {
+    console.log("cache hit!")
+    return embeddingCache.get(text)!;
+  }
+
+  console.log("cache miss!")
+
+  const apiKey = Deno.env.get("OPENAI_API_KEY");
+  if (!apiKey) throw new Error("Missing OPENAI_API_KEY");
+
+  const response = await fetch("https://api.openai.com/v1/embeddings", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "text-embedding-3-large",
+      input: text,
+    }),
+  });
+
+  const json = await response.json();
+  if (!json.data || !json.data[0] || !json.data[0].embedding) {
+    throw new Error("Embedding API error:" + JSON.stringify(json));
+  }
+  const embedding = json.data[0].embedding;
+
+  // Cache the result before returning.
+  embeddingCache.set(text, embedding);
+  return embedding;
 }
 
 // ------------------------
@@ -190,12 +193,19 @@ export const aidanbenchGame: Game<AidanBenchState> = {
 					state.responses.map((r, i) => `${i + 1}. ${r}`).join("\n")
 				: "";
 			return `Open-Ended Question: "${state.question}"${history}
-  Now, please provide another creative and unique answer that introduces a new perspective.
-  Remember: The goal is to generate as many different answers as possible—avoid any repetition.`;
+ \tNow, please provide another creative and unique answer that introduces a new perspective.
+ \tRemember: The goal is to generate as many different answers as possible—avoid any repetition.`;
 		},
 	},
 	answerParserPrompt:
 		"Extract only the answer text from the response. Do not include any extra commentary.",
+    initializeState: (question: string): AidanBenchState => {
+        return {
+            question,
+            responses: [],
+            score: 0,
+        };
+    },
 	updateState: (state: AidanBenchState, parsedAnswer: string) => {
 		state.responses.push(parsedAnswer);
 		state.score += 1;

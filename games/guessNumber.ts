@@ -23,6 +23,12 @@ export const guessNumberGame: Game<{ guesses: number[]; target: number }> = {
 		},
 	},
 	version: 1,
+	initializeState: (target: number) => {
+		return {
+			guesses: [],
+			target,
+		}
+	},
 	updateState: (state, parsedAnswer) => {
 		state.guesses.push(Number.parseInt(parsedAnswer));
 		return state;

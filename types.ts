@@ -15,6 +15,7 @@ export type Game<GameState extends object = Record<string, unknown>> = {
 	evaluateStatus: (state: GameState) => GameStatus | Promise<GameStatus>;
 	answerParserPrompt: string;
 	version: number;
+	initializeState: (...args: any[]) => GameState;
 	updateState: (
 		state: GameState,
 		parsedAnswer: string,

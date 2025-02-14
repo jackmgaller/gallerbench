@@ -1,26 +1,22 @@
 import { benchmarkGame } from "./benchmarkGame.ts";
+import aidanbenchQuestions from "./data/aidanbenchQuestions.json" with { type: "json" };
 import { gameLoop, multiplayerGameLoop } from "./gameLoop.ts";
 import {
-	aidanbenchGame,
-	initializeAidanBenchState,
+  aidanbenchGame,
 } from "./games/aidanbench.ts";
-import { connect4Game, initializeConnect4State } from "./games/connectFour.ts";
-import { initializeGame, texasHoldEm } from "./games/poker.ts";
+import { connect4Game } from "./games/connectFour.ts";
+import { texasHoldEm } from "./games/poker.ts";
 import { ticTacToeGame } from "./games/ticTacToe.ts";
 import { initializeWordleState, wordleGame } from "./games/wordle.ts";
 import {
-	getOpenAIModels,
-	HumanPlayer,
-	LanguageModel,
-	LanguageModelName,
-	models,
+  getOpenAIModels,
+  LanguageModel,
+  LanguageModelName,
+  models
 } from "./models.ts";
 import {
-	calculateWinRate,
-	logGameResult,
-	logMultiplayerGameResult,
+  logMultiplayerGameResult
 } from "./statistics.ts";
-import aidanbenchQuestions from "./data/aidanbenchQuestions.json" with { type: "json" };
 
 if (false) {
 	const m = await getOpenAIModels();
@@ -38,18 +34,8 @@ if (true) {
 
   await gameLoop(
 		aidanbenchGame,
-		models[LanguageModelName["o1"]],
-		initializeAidanBenchState(
-			randomQ,
-		),
-	);
-
-	await gameLoop(
-		aidanbenchGame,
-		models[LanguageModelName["Claude 3.5 Sonnet"]],
-		initializeAidanBenchState(
-			"Propose an alternative to democracy for successfully and fairly governing a country.",
-		),
+		models[LanguageModelName["GPT-4o"]],	
+    randomQ,
 	);
 }
 
@@ -98,8 +84,7 @@ if (false) {
 			models[LanguageModelName["o3 mini"]],
 			models[LanguageModelName["o3 mini"]],
 			models[LanguageModelName["o3 mini"]],
-		],
-		initializeGame(4),
+		]
 	);
 
 	console.log(run.state);
@@ -113,7 +98,6 @@ if (false) {
 			models[LanguageModelName["o3 mini high"]],
 			models[LanguageModelName["o3 mini high"]],
 		],
-		initializeConnect4State(),
 	);
 }
 
@@ -123,14 +107,7 @@ if (false) {
 			models[LanguageModelName["o3 mini"]],
 			models[LanguageModelName["o3 mini"]],
 		];
-		const run = await multiplayerGameLoop(ticTacToeGame, competitors, {
-			board: [
-				[null, null, null],
-				[null, null, null],
-				[null, null, null],
-			],
-			turn: 1,
-		});
+		const run = await multiplayerGameLoop(ticTacToeGame, competitors);
 
 		await logMultiplayerGameResult(
 			run.status,

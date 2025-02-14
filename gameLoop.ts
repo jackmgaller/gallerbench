@@ -80,11 +80,12 @@ export type GameLoopOptions = {
 export const gameLoop = async <GameState extends object>(
 	game: Game<GameState>,
 	model: LanguageModel,
-	state: GameState,
+	stateOptions: any, 
 	options?: GameLoopOptions,
 ) => {
 	const chat: ChatMessage[] = [];
 	const verbose = !(options && options.quiet);
+	let state = game.initializeState(stateOptions);
 
 	// Log and send the initial prompt.
 	const initialPrompt = typeof game.prompts.first === "string"
@@ -152,11 +153,11 @@ export const gameLoop = async <GameState extends object>(
 export const multiplayerGameLoop = async <GameState extends object>(
 	game: MultiplayerGame<GameState>,
 	models: LanguageModel[],
-	state: GameState,
 	gptOptions?: Partial<GPTOptions | AnthropicOptions>,
 ) => {
 	const chats: ChatMessage[][] = models.map(() => []);
 	let status = GameStatus.Ongoing;
+	let state = game.initializeState();
 
 	// Loop until the game status is not ongoing.
 	while (status === GameStatus.Ongoing) {

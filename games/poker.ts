@@ -74,33 +74,6 @@ export type TexasHoldEmState = {
 	playersActed: Set<number>;
 };
 
-// ─── INITIALIZATION ─────────────────────────────────────────────────────────────
-
-export function initializeGame(playersCount: number): TexasHoldEmState {
-	const deck = createShuffledDeck();
-	const players: PlayerState[] = [];
-	for (let i = 0; i < playersCount; i++) {
-		players.push({
-			hand: [deck.pop()!, deck.pop()!],
-			chips: 1000,
-			bet: 0,
-			folded: false,
-		});
-	}
-	return {
-		deck,
-		players,
-		communityCards: [],
-		currentBet: 0,
-		pot: 0,
-		dealer: 0,
-		phase: "pre-flop",
-		// Typically, the first player to act is the one after the dealer.
-		currentPlayer: (0 + 1) % playersCount,
-		playersActed: new Set<number>(),
-	};
-}
-
 // ─── PROMPT FUNCTIONS ───────────────────────────────────────────────────────────
 
 const buildPrompt = (
@@ -551,6 +524,30 @@ export const texasHoldEm: MultiplayerGame<TexasHoldEmState> = {
 	prompts: {
 		first: firstPrompt,
 		turn: firstPrompt, // reusing the same prompt for each turn
+	},
+	initializeState: (playersCount: number): TexasHoldEmState => {
+		const deck = createShuffledDeck();
+		const players: PlayerState[] = [];
+		for (let i = 0; i < playersCount; i++) {
+			players.push({
+				hand: [deck.pop()!, deck.pop()!],
+				chips: 1000,
+				bet: 0,
+				folded: false,
+			});
+		}
+		return {
+			deck,
+			players,
+			communityCards: [],
+			currentBet: 0,
+			pot: 0,
+			dealer: 0,
+			phase: "pre-flop",
+			// Typically, the first player to act is the one after the dealer.
+			currentPlayer: (0 + 1) % playersCount,
+			playersActed: new Set<number>(),
+		};
 	},
 	updateState,
 	answerParserPrompt,

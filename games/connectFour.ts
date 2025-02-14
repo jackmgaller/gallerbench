@@ -21,14 +21,6 @@ const createEmptyBoard = (): (number | null)[][] => {
 	return board;
 };
 
-// Initialize the Connect 4 game state.
-export const initializeConnect4State = (): Connect4State => {
-	return {
-		board: createEmptyBoard(),
-		turn: 1, // Player 1 (represented as 1) goes first.
-	};
-};
-
 // Convert the board to a string for display. We'll show empty cells as "."; player 1 as "X" and player 2 as "O".
 // (Rows are printed top-to-bottom; note that the bottom row is where pieces “land”.)
 export const connect4BoardToString = (board: (number | null)[][]): string => {
@@ -131,6 +123,12 @@ export const connect4Game: MultiplayerGame<Connect4State> = {
 	answerParserPrompt:
 		"You are analyzing a move in Connect 4. Extract the column number from the player's response. " +
 		"The column number must be an integer between 1 and 7 (inclusive). Return only the number with no extra characters.",
+	initializeState: (): Connect4State => {
+		return {
+			board: createEmptyBoard(),
+			turn: 1, // Player 1 (represented as 1) goes first.
+		};
+	},
 	// Update the state based on the move.
 	updateState: (
 		state: Connect4State,

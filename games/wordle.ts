@@ -96,6 +96,7 @@ export const wordleGame: Game<{ guesses: string[]; solution: string }> = {
 	},
 	answerParserPrompt:
 		"I am an AI researcher investigating chatbots playing the game Wordle. Your job is to take their guess, and parse out specifically what their guess was. I need you take the correct word they guessed, and return only that - no other words. Do not return the wrong word.",
+	initializeState: initializeWordleState,
 	updateState: (state, parsedAnswer) => {
 		state.guesses.push(parsedAnswer);
 		return state;
