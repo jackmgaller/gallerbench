@@ -23,22 +23,9 @@ if (false) {
   console.log(m.map((model) => model.id).join("\n"));
 }
 
-console.log(models);
-console.log(models[LanguageModelName["GPT-4o"]]);
-console.log(models[LanguageModelName["o3 mini high"]]);
-
-if (false) {
+if (true) {
   const testingModels: LanguageModel[] = [
-    // models[LanguageModelName["GPT-3.5-turbo"]],
-    // models[LanguageModelName["GPT-4o mini"]],
-    // models[LanguageModelName["GPT-4o"]],
-    // models[LanguageModelName["Claude 3 Haiku"]],
-    // models[LanguageModelName["Claude 3.5 Sonnet"]],
-    // models[LanguageModelName["Claude 3 Opus"]],
-    // models[LanguageModelName["GPT-4o-2024-08-06"]]
-    // models[LanguageModelName["GPT-4o-latest"]],
-    // models[LanguageModelName["o1 mini"]],
-    // models[LanguageModelName["o1"]],
+    models[LanguageModelName["o3 mini high"]],
     models[LanguageModelName["o3 mini low"]],
   ];
 
@@ -92,21 +79,10 @@ if (true) {
   const run = await multiplayerGameLoop(
     connect4Game,
     [
-      // models[LanguageModelName["o3 mini"]],
-      HumanPlayer,
-      HumanPlayer,
+      models[LanguageModelName["o3 mini high"]],
+      models[LanguageModelName["o3 mini high"]],
     ],
     initializeConnect4State(),
-  );
-
-  await logMultiplayerGameResult(
-    run.status,
-    connect4Game,
-    [
-      models[LanguageModelName["o3 mini"]],
-      models[LanguageModelName["o3 mini"]],
-    ],
-    run.winner,
   );
 }
 

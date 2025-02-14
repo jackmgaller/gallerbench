@@ -1,4 +1,6 @@
 // models.ts
+import "jsr:@std/dotenv/load";
+
 
 /**
  * The API key for accessing OpenAI's endpoints.
@@ -202,7 +204,7 @@ export class AnthropicModel extends LanguageModel {
       }),
       method: "POST",
       headers: {
-        "x-api-key": ANTHROPIC_API_KEY,
+        "x-api-key": ANTHROPIC_API_KEY ?? "",
         "anthropic-version": "2023-06-01",
         "Content-Type": "application/json",
       },
