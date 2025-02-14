@@ -1,6 +1,6 @@
 {
-  "deno.enable": true,
-  "cSpell.words": [
-    "Wordle"
-  ]
+	"deno.enable": true,
+	"cSpell.words": [
+		"Wordle"
+	]
 }

@@ -24051,5 +24051,236 @@
 			"name": "o3-mini",
 			"reasoningEffort": "low"
 		}
+	},
+	{
+		"type": "single",
+		"name": "Wordle",
+		"version": 1.5,
+		"result": "Win",
+		"timestamp": "2025-02-14T19:34:29.007Z",
+		"model": {
+			"name": "o3-mini",
+			"reasoningEffort": "high"
+		}
+	},
+	{
+		"type": "single",
+		"name": "Wordle",
+		"version": 1.5,
+		"result": "Win",
+		"timestamp": "2025-02-14T19:35:19.930Z",
+		"model": {
+			"name": "o3-mini",
+			"reasoningEffort": "low"
+		}
+	},
+	{
+		"type": "single",
+		"name": "Wordle",
+		"version": 1.5,
+		"result": "Win",
+		"timestamp": "2025-02-14T19:37:56.920Z",
+		"model": {
+			"name": "o3-mini",
+			"reasoningEffort": "high"
+		}
+	},
+	{
+		"type": "single",
+		"name": "Wordle",
+		"version": 1.5,
+		"result": "Win",
+		"timestamp": "2025-02-14T19:39:09.112Z",
+		"model": {
+			"name": "o3-mini",
+			"reasoningEffort": "low"
+		}
+	},
+	{
+		"type": "single",
+		"name": "Wordle",
+		"version": 1.5,
+		"result": "Win",
+		"timestamp": "2025-02-14T19:40:23.656Z",
+		"model": {
+			"name": "o3-mini",
+			"reasoningEffort": "high"
+		}
+	},
+	{
+		"type": "single",
+		"name": "Wordle",
+		"version": 1.5,
+		"result": "Win",
+		"timestamp": "2025-02-14T19:40:46.498Z",
+		"model": {
+			"name": "o3-mini",
+			"reasoningEffort": "low"
+		}
+	},
+	{
+		"type": "single",
+		"name": "Wordle",
+		"version": 1.5,
+		"result": "Win",
+		"timestamp": "2025-02-14T19:42:51.119Z",
+		"model": {
+			"name": "o3-mini",
+			"reasoningEffort": "high"
+		}
+	},
+	{
+		"type": "single",
+		"name": "Wordle",
+		"version": 1.5,
+		"result": "Win",
+		"timestamp": "2025-02-14T19:43:21.858Z",
+		"model": {
+			"name": "o3-mini",
+			"reasoningEffort": "low"
+		}
+	},
+	{
+		"type": "single",
+		"name": "Wordle",
+		"version": 1.5,
+		"result": "Win",
+		"timestamp": "2025-02-14T19:45:21.149Z",
+		"model": {
+			"name": "o3-mini",
+			"reasoningEffort": "high"
+		}
+	},
+	{
+		"type": "single",
+		"name": "Wordle",
+		"version": 1.5,
+		"result": "Win",
+		"timestamp": "2025-02-14T19:46:42.029Z",
+		"model": {
+			"name": "o3-mini",
+			"reasoningEffort": "low"
+		}
+	},
+	{
+		"type": "single",
+		"name": "Wordle",
+		"version": 1.5,
+		"result": "Win",
+		"timestamp": "2025-02-14T19:47:56.992Z",
+		"model": {
+			"name": "o3-mini",
+			"reasoningEffort": "high"
+		}
+	},
+	{
+		"type": "single",
+		"name": "Wordle",
+		"version": 1.5,
+		"result": "Win",
+		"timestamp": "2025-02-14T19:48:07.030Z",
+		"model": {
+			"name": "o3-mini",
+			"reasoningEffort": "low"
+		}
+	},
+	{
+		"type": "single",
+		"name": "Wordle",
+		"version": 1.5,
+		"result": "Win",
+		"timestamp": "2025-02-14T19:49:33.044Z",
+		"model": {
+			"name": "o3-mini",
+			"reasoningEffort": "high"
+		}
+	},
+	{
+		"type": "single",
+		"name": "Wordle",
+		"version": 1.5,
+		"result": "Win",
+		"timestamp": "2025-02-14T19:49:50.548Z",
+		"model": {
+			"name": "o3-mini",
+			"reasoningEffort": "low"
+		}
+	},
+	{
+		"type": "single",
+		"name": "Wordle",
+		"version": 1.5,
+		"result": "Win",
+		"timestamp": "2025-02-14T19:52:33.073Z",
+		"model": {
+			"name": "o3-mini",
+			"reasoningEffort": "high"
+		}
+	},
+	{
+		"type": "single",
+		"name": "Wordle",
+		"version": 1.5,
+		"result": "Win",
+		"timestamp": "2025-02-14T19:53:18.648Z",
+		"model": {
+			"name": "o3-mini",
+			"reasoningEffort": "low"
+		}
+	},
+	{
+		"type": "single",
+		"name": "Wordle",
+		"version": 1.5,
+		"result": "Win",
+		"timestamp": "2025-02-14T19:54:05.241Z",
+		"model": {
+			"name": "o3-mini",
+			"reasoningEffort": "high"
+		}
+	},
+	{
+		"type": "single",
+		"name": "Wordle",
+		"version": 1.5,
+		"result": "Win",
+		"timestamp": "2025-02-14T19:54:31.758Z",
+		"model": {
+			"name": "o3-mini",
+			"reasoningEffort": "low"
+		}
+	},
+	{
+		"type": "single",
+		"name": "Wordle",
+		"version": 1.5,
+		"result": "Win",
+		"timestamp": "2025-02-14T19:58:04.687Z",
+		"model": {
+			"name": "o3-mini",
+			"reasoningEffort": "high"
+		}
+	},
+	{
+		"type": "single",
+		"name": "Wordle",
+		"version": 1.5,
+		"result": "Win",
+		"timestamp": "2025-02-14T19:58:29.197Z",
+		"model": {
+			"name": "o3-mini",
+			"reasoningEffort": "low"
+		}
+	},
+	{
+		"type": "single",
+		"name": "Wordle",
+		"version": 1.5,
+		"result": "Win",
+		"timestamp": "2025-02-14T20:00:46.034Z",
+		"model": {
+			"name": "o3-mini",
+			"reasoningEffort": "high"
+		}
 	}
 ]
