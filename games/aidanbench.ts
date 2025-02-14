@@ -78,23 +78,64 @@ export async function computeCoherence(
 	answer: string,
 ): Promise<number> {
 	const judgePrompt =
-		`Evaluate the following answer for coherence and plausibility on a scale from 0 to 100.
-Question: ${question}
-Answer: ${answer}
-Return only a single number.`;
+		`Your task is to evaluate the coherence and plausibility of an answer to a given question.
+  
+  Question: <question>${question}</question>
+  Answer: <answer>${answer}</answer>
+  
+  Based on the following criteria, provide a Coherence and Plausibility Score on a scale of 0 - 100:
+  
+  0-20: INCOHERENT/NONSENSICAL
+  - Answer is completely unrelated to the question
+  - Contains logical impossibilities or contradictions
+  - Makes claims that defy basic reality
+  - Shows no understanding of the question's context
+  
+  21-40: SEVERELY FLAWED
+  - Major logical gaps or inconsistencies
+  - Significant misunderstanding of core concepts
+  - Contains partially relevant information but mostly incorrect
+  - May include some true statements but fails to form a coherent response
+  
+  41-60: PARTIALLY COHERENT
+  - Shows basic understanding of the question
+  - Contains some valid points mixed with errors
+  - Logic is followable but may have weak connections
+  - Answer is relevant but may miss key aspects
+  
+  61-80: MOSTLY COHERENT
+  - Demonstrates clear understanding of the question
+  - Logic is sound with minor gaps or inconsistencies
+  - Most claims are plausible and well-supported
+  - Forms a generally complete and relevant response
+  
+  81-100: HIGHLY COHERENT
+  - Perfectly addresses the question
+  - Demonstrates complete logical consistency
+  - All claims are plausible and well-grounded
+  - Forms a comprehensive and precise response
+  
+  IMPORTANT: Provide your final Coherence and Plausibility Score as a single integer between 0 and 100, enclosed in <coherence_score></coherence_score> XML tags. For example:
+  <coherence_score>75</coherence_score>
+  
+  Do not include any additional text in your response.`;
+
 	// Use the judge model (o1-mini) from our models mapping.
 	const judgeModel = models[LanguageModelName["o1 mini"]];
-	// We assume that the judge model’s complete() method returns a ChatMessage.
 	const chatMessages = [{ role: "user", content: judgePrompt }];
 	const response = await judgeModel.complete(chatMessages);
-	// Attempt to parse the returned number.
-	const score = parseInt(response.content.trim(), 10);
-	if (isNaN(score)) {
+
+	// Extract the number from the XML tags using a regular expression.
+	const match = response.content.trim().match(
+		/<coherence_score>(\d+)<\/coherence_score>/,
+	);
+	if (!match) {
 		throw new Error(
 			"Failed to parse coherence score from response: " +
 				response.content,
 		);
 	}
+	const score = parseInt(match[1], 10);
 	return score;
 }
 
@@ -137,9 +178,11 @@ export const aidanbenchGame: Game<AidanBenchState> = {
 	version: 1.0,
 	prompts: {
 		first: (state: AidanBenchState) => {
-			return `You are now being evaluated on creativity, reliability, and instruction following.
-Open-Ended Question: "${state.question}"
-Please provide your first, original answer.`;
+			return `Welcome to AidanBench!
+  Your objective is to generate a wide variety of creative, distinct, and innovative answers to the open-ended question below.
+  Every answer should explore a new angle — do not repeat any ideas, phrases, or themes.
+  Open-Ended Question: "${state.question}"
+  Please provide your very first, original answer.`;
 		},
 		turn: (state: AidanBenchState) => {
 			const history = state.responses.length > 0
@@ -147,7 +190,8 @@ Please provide your first, original answer.`;
 					state.responses.map((r, i) => `${i + 1}. ${r}`).join("\n")
 				: "";
 			return `Open-Ended Question: "${state.question}"${history}
-Please provide a new, creative answer that does not repeat any previous response.`;
+  Now, please provide another creative and unique answer that introduces a new perspective.
+  Remember: The goal is to generate as many different answers as possible—avoid any repetition.`;
 		},
 	},
 	answerParserPrompt:
@@ -157,10 +201,8 @@ Please provide a new, creative answer that does not repeat any previous response
 		state.score += 1;
 		return state;
 	},
-	// Note: evaluateStatus is now asynchronous.
 	async evaluateStatus(state: AidanBenchState): Promise<GameStatus> {
 		const lastResponse = state.responses[state.responses.length - 1];
-		// Compute coherence and novelty scores for the latest answer.
 		const coherence = await computeCoherence(state.question, lastResponse);
 		const novelty = await computeNovelty(
 			lastResponse,
@@ -171,7 +213,6 @@ Please provide a new, creative answer that does not repeat any previous response
 				novelty.toFixed(2)
 			}`,
 		);
-		// Terminate if either score is below its threshold.
 		if (coherence <= COHERENCE_THRESHOLD || novelty <= NOVELTY_THRESHOLD) {
 			return GameStatus.Win;
 		}

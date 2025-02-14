@@ -20,6 +20,7 @@ import {
 	logGameResult,
 	logMultiplayerGameResult,
 } from "./statistics.ts";
+import aidanbenchQuestions from "./data/aidanbenchQuestions.json" with { type: "json" };
 
 if (false) {
 	const m = await getOpenAIModels();
@@ -31,9 +32,21 @@ console.log([
 ]);
 
 if (true) {
+  const randomQ = aidanbenchQuestions[Math.floor(aidanbenchQuestions.length * Math.random())];
+
+  console.log(randomQ);
+
+  await gameLoop(
+		aidanbenchGame,
+		models[LanguageModelName["o1"]],
+		initializeAidanBenchState(
+			randomQ,
+		),
+	);
+
 	await gameLoop(
 		aidanbenchGame,
-		models[LanguageModelName["GPT-4o mini"]],
+		models[LanguageModelName["Claude 3.5 Sonnet"]],
 		initializeAidanBenchState(
 			"Propose an alternative to democracy for successfully and fairly governing a country.",
 		),

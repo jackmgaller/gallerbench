@@ -106,8 +106,8 @@ export const gameLoop = async <GameState extends object>(
 		game.answerParserPrompt,
 		response.content,
 	);
-	state = game.updateState(state, parsedAnswer);
-	let status = game.evaluateStatus(state);
+	state = await game.updateState(state, parsedAnswer);
+	let status: GameStatus = await game.evaluateStatus(state);
 
 	// Main game loop.
 	while (status === GameStatus.Ongoing) {
@@ -129,8 +129,8 @@ export const gameLoop = async <GameState extends object>(
 			game.answerParserPrompt,
 			response.content,
 		);
-		state = game.updateState(state, parsedAnswer);
-		status = game.evaluateStatus(state);
+		state = await game.updateState(state, parsedAnswer);
+		status = await game.evaluateStatus(state);
 
 		if (options?.delay) {
 			await sleep(options.delay);
