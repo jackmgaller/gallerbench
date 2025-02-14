@@ -1,5 +1,9 @@
 import { benchmarkGame } from "./benchmarkGame.ts";
 import { gameLoop, multiplayerGameLoop } from "./gameLoop.ts";
+import {
+	aidanbenchGame,
+	initializeAidanBenchState,
+} from "./games/aidanbench.ts";
 import { connect4Game, initializeConnect4State } from "./games/connectFour.ts";
 import { initializeGame, texasHoldEm } from "./games/poker.ts";
 import { ticTacToeGame } from "./games/ticTacToe.ts";
@@ -27,6 +31,16 @@ console.log([
 ]);
 
 if (true) {
+	await gameLoop(
+		aidanbenchGame,
+		models[LanguageModelName["GPT-4o mini"]],
+		initializeAidanBenchState(
+			"Propose an alternative to democracy for successfully and fairly governing a country.",
+		),
+	);
+}
+
+if (false) {
 	// Select the models you want to test.
 	const testModels: LanguageModel[] = [
 		models[LanguageModelName["o1 mini"]],

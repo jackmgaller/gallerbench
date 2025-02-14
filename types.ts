@@ -12,7 +12,7 @@ export type Game<GameState extends object = Record<string, unknown>> = {
 		first: string | ((state: GameState) => string);
 		turn: string | ((state: GameState) => string);
 	};
-	evaluateStatus: (state: GameState) => GameStatus;
+	evaluateStatus: (state: GameState) => GameStatus | Promise<GameStatus>;
 	answerParserPrompt: string;
 	version: number;
 	updateState: (

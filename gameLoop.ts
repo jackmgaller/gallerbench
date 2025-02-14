@@ -207,8 +207,8 @@ export const multiplayerGameLoop = async <GameState extends object>(
 				game.answerParserPrompt,
 				response.content,
 			);
-			state = game.updateState(state, parsedAnswer, player);
-			status = game.evaluateStatus(state);
+			state = await game.updateState(state, parsedAnswer, player);
+			status = await game.evaluateStatus(state);
 
 			if (status !== GameStatus.Ongoing) {
 				break;
