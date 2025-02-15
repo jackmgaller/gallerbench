@@ -27,7 +27,7 @@ export const guessNumberGame: Game<{ guesses: number[]; target: number }> = {
 		return {
 			guesses: [],
 			target,
-		}
+		};
 	},
 	updateState: (state, parsedAnswer) => {
 		state.guesses.push(Number.parseInt(parsedAnswer));

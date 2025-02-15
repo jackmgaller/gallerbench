@@ -267,8 +267,10 @@ export enum LanguageModelName {
 	"o3 mini low",
 	"GPT-3.5 turbo",
 	"Claude 3 Haiku",
+	"Claude 3.5 Haiku",
 	"Claude 3 Sonnet",
 	"Claude 3.5 Sonnet",
+	"Claude 3.5 Sonnet (new)",
 	"Claude 3 Opus",
 }
 
@@ -319,11 +321,17 @@ export const models: Record<LanguageModelName, LanguageModel> = {
 	[LanguageModelName["Claude 3 Haiku"]]: new AnthropicModel(
 		"claude-3-haiku-20240307",
 	),
+	[LanguageModelName["Claude 3.5 Haiku"]]: new AnthropicModel(
+		"claude-3-5-haiku-20241022",
+	),
 	[LanguageModelName["Claude 3 Sonnet"]]: new AnthropicModel(
 		"claude-3-sonnet-20240229",
 	),
 	[LanguageModelName["Claude 3.5 Sonnet"]]: new AnthropicModel(
 		"claude-3-5-sonnet-20240620",
+	),
+	[LanguageModelName["Claude 3.5 Sonnet (new)"]]: new AnthropicModel(
+		"claude-3-5-sonnet-20241022",
 	),
 	[LanguageModelName["Claude 3 Opus"]]: new AnthropicModel(
 		"claude-3-opus-20240229",

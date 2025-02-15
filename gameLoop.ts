@@ -80,7 +80,7 @@ export type GameLoopOptions = {
 export const gameLoop = async <GameState extends object>(
 	game: Game<GameState>,
 	model: LanguageModel,
-	stateOptions: any, 
+	stateOptions: any,
 	options?: GameLoopOptions,
 ) => {
 	const chat: ChatMessage[] = [];
@@ -142,6 +142,7 @@ export const gameLoop = async <GameState extends object>(
 		"%c" + status.toString() + "!",
 		"color: purple; font-weight: bold;",
 	);
+
 	await Deno.writeTextFile("out/chat.json", JSON.stringify(chat, null, "\t"));
 
 	return { state, status };

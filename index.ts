@@ -1,22 +1,20 @@
 import { benchmarkGame } from "./benchmarkGame.ts";
-import aidanbenchQuestions from "./data/aidanbenchQuestions.json" with { type: "json" };
+import aidanbenchQuestions from "./data/aidanbenchQuestions.json" with {
+	type: "json",
+};
 import { gameLoop, multiplayerGameLoop } from "./gameLoop.ts";
-import {
-  aidanbenchGame,
-} from "./games/aidanbench.ts";
+import { aidanbenchGame } from "./games/aidanbench.ts";
 import { connect4Game } from "./games/connectFour.ts";
 import { texasHoldEm } from "./games/poker.ts";
 import { ticTacToeGame } from "./games/ticTacToe.ts";
 import { initializeWordleState, wordleGame } from "./games/wordle.ts";
 import {
-  getOpenAIModels,
-  LanguageModel,
-  LanguageModelName,
-  models
+	getOpenAIModels,
+	LanguageModel,
+	LanguageModelName,
+	models,
 } from "./models.ts";
-import {
-  logMultiplayerGameResult
-} from "./statistics.ts";
+import { logMultiplayerGameResult } from "./statistics.ts";
 
 if (false) {
 	const m = await getOpenAIModels();
@@ -28,15 +26,48 @@ console.log([
 ]);
 
 if (true) {
-  const randomQ = aidanbenchQuestions[Math.floor(aidanbenchQuestions.length * Math.random())];
+	const questions = [
+		// "Who's the most intelligent character in all of fiction?",
+		"What's the most important thing a country can have to grow?"
+	];
 
-  console.log(randomQ);
+	const benchmark_models: LanguageModel[] = [
+		models[LanguageModelName["GPT-4o mini"]],
+		models[LanguageModelName["GPT-4o"]],
+	];
 
-  await gameLoop(
-		aidanbenchGame,
-		models[LanguageModelName["GPT-4o"]],	
-    randomQ,
-	);
+	const results = [];
+
+	for (let i = 0; i < questions.length; i++) {
+		const question = questions[i];
+		results.push(question);
+
+		for (let j = 0; j < benchmark_models.length; j++) {
+			const model = benchmark_models[j];
+
+			console.log(question);
+			console.log(model.name);
+
+			const r = await gameLoop(
+				aidanbenchGame,
+				model,
+				question,
+			);
+
+			results.push([
+				{
+					name: model.name,
+					question,
+					answers: {
+						count: r.state.responses.length,
+						content: r.state.responses,
+					},
+				},
+			]);
+		}
+	}
+
+	console.log(JSON.stringify(results, null, "\t"));
 }
 
 if (false) {
@@ -84,7 +115,7 @@ if (false) {
 			models[LanguageModelName["o3 mini"]],
 			models[LanguageModelName["o3 mini"]],
 			models[LanguageModelName["o3 mini"]],
-		]
+		],
 	);
 
 	console.log(run.state);

@@ -37,38 +37,35 @@ function cosineSimilarity(a: number[], b: number[]): number {
 const embeddingCache = new Map<string, number[]>();
 
 export async function computeEmbedding(text: string): Promise<number[]> {
-  // Check if the embedding for this text is already cached.
-  if (embeddingCache.has(text)) {
-    console.log("cache hit!")
-    return embeddingCache.get(text)!;
-  }
+	// Check if the embedding for this text is already cached.
+	if (embeddingCache.has(text)) {
+		return embeddingCache.get(text)!;
+	}
 
-  console.log("cache miss!")
+	const apiKey = Deno.env.get("OPENAI_API_KEY");
+	if (!apiKey) throw new Error("Missing OPENAI_API_KEY");
 
-  const apiKey = Deno.env.get("OPENAI_API_KEY");
-  if (!apiKey) throw new Error("Missing OPENAI_API_KEY");
+	const response = await fetch("https://api.openai.com/v1/embeddings", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			"Authorization": `Bearer ${apiKey}`,
+		},
+		body: JSON.stringify({
+			model: "text-embedding-3-large",
+			input: text,
+		}),
+	});
 
-  const response = await fetch("https://api.openai.com/v1/embeddings", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: "text-embedding-3-large",
-      input: text,
-    }),
-  });
+	const json = await response.json();
+	if (!json.data || !json.data[0] || !json.data[0].embedding) {
+		throw new Error("Embedding API error:" + JSON.stringify(json));
+	}
+	const embedding = json.data[0].embedding;
 
-  const json = await response.json();
-  if (!json.data || !json.data[0] || !json.data[0].embedding) {
-    throw new Error("Embedding API error:" + JSON.stringify(json));
-  }
-  const embedding = json.data[0].embedding;
-
-  // Cache the result before returning.
-  embeddingCache.set(text, embedding);
-  return embedding;
+	// Cache the result before returning.
+	embeddingCache.set(text, embedding);
+	return embedding;
 }
 
 // ------------------------
@@ -124,7 +121,7 @@ export async function computeCoherence(
   Do not include any additional text in your response.`;
 
 	// Use the judge model (o1-mini) from our models mapping.
-	const judgeModel = models[LanguageModelName["o1 mini"]];
+	const judgeModel = models[LanguageModelName["GPT-4o"]];
 	const chatMessages = [{ role: "user", content: judgePrompt }];
 	const response = await judgeModel.complete(chatMessages);
 
@@ -154,6 +151,7 @@ export async function computeNovelty(
 ): Promise<number> {
 	if (previous.length === 0) return 1.0;
 	const newEmb = await computeEmbedding(newAnswer);
+	console.log({ vector: newEmb.slice(0, 10) });
 	let maxSim = 0;
 	// In a real-world system you might cache embeddings for previous answers.
 	for (const prev of previous) {
@@ -188,24 +186,20 @@ export const aidanbenchGame: Game<AidanBenchState> = {
   Please provide your very first, original answer.`;
 		},
 		turn: (state: AidanBenchState) => {
-			const history = state.responses.length > 0
-				? "\nPrevious responses:\n" +
-					state.responses.map((r, i) => `${i + 1}. ${r}`).join("\n")
-				: "";
-			return `Open-Ended Question: "${state.question}"${history}
+			return `Open-Ended Question: "${state.question}"
  \tNow, please provide another creative and unique answer that introduces a new perspective.
  \tRemember: The goal is to generate as many different answers as possible—avoid any repetition.`;
 		},
 	},
 	answerParserPrompt:
 		"Extract only the answer text from the response. Do not include any extra commentary.",
-    initializeState: (question: string): AidanBenchState => {
-        return {
-            question,
-            responses: [],
-            score: 0,
-        };
-    },
+	initializeState: (question: string): AidanBenchState => {
+		return {
+			question,
+			responses: [],
+			score: 0,
+		};
+	},
 	updateState: (state: AidanBenchState, parsedAnswer: string) => {
 		state.responses.push(parsedAnswer);
 		state.score += 1;
@@ -213,17 +207,21 @@ export const aidanbenchGame: Game<AidanBenchState> = {
 	},
 	async evaluateStatus(state: AidanBenchState): Promise<GameStatus> {
 		const lastResponse = state.responses[state.responses.length - 1];
+		console.log("Computing coherence...");
 		const coherence = await computeCoherence(state.question, lastResponse);
+		console.log("Computing novelty...");
 		const novelty = await computeNovelty(
 			lastResponse,
 			state.responses.slice(0, -1),
 		);
 		console.log(
-			`Last answer coherence: ${coherence} | novelty: ${
-				novelty.toFixed(2)
-			}`,
+			`coherence: ${coherence} | novelty: ${novelty.toFixed(2)}`,
 		);
 		if (coherence <= COHERENCE_THRESHOLD || novelty <= NOVELTY_THRESHOLD) {
+			state.responses.forEach((resp, indx) => {
+				console.log(`${indx + 1}. ${resp}`);
+			});
+			console.log(`${state.responses.length} responses in total`);
 			return GameStatus.Win;
 		}
 		return GameStatus.Ongoing;
