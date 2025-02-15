@@ -2,7 +2,11 @@
 
 import { gameLoop } from "./gameLoop.ts";
 import { Game, GameStatus } from "./types.ts";
-import { LanguageModel } from "./models.ts";
+import { LanguageModel, LanguageModelName, models } from "./models.ts";
+import { aidanbenchGame } from "./games/aidanbench.ts";
+import aidanbenchQuestions from "./data/aidanbenchQuestions.json" with {
+	type: "json",
+};
 
 type BenchmarkOutput = {
 	model: LanguageModel;
@@ -76,4 +80,49 @@ export async function benchmarkGame<GameState extends object>(
 	});
 
 	return results;
+}
+
+export async function benchmarkAidanbench(models: LanguageModel[]) {
+	const results = [];
+
+	for (const question of aidanbenchQuestions) {
+		for (const model of models) {
+			console.log(question);
+			console.log(model.name);
+
+			const r = await gameLoop(
+				aidanbenchGame,
+				model,
+				question,
+			);
+
+			results.push(
+				{
+					name: model.name,
+					question,
+					answers: {
+						count: r.state.responses.length,
+						content: r.state.responses,
+					},
+				},
+			);
+		}
+	}
+
+	const totals: Record<string, number> = {};
+
+	results.forEach((result) => {
+		if (totals[result.name]) {
+			totals[result.name] += result.answers.count;
+		} else {
+			totals[result.name] = result.answers.count;
+		}
+	});
+
+	const resultsWithTotals = {
+		totals,
+		results,
+	};
+
+	return resultsWithTotals;
 }

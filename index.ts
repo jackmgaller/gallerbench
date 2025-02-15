@@ -1,7 +1,4 @@
-import { benchmarkGame } from "./benchmarkGame.ts";
-import aidanbenchQuestions from "./data/aidanbenchQuestions.json" with {
-	type: "json",
-};
+import { benchmarkAidanbench, benchmarkGame } from "./benchmarkGame.ts";
 import { gameLoop, multiplayerGameLoop } from "./gameLoop.ts";
 import { aidanbenchGame } from "./games/aidanbench.ts";
 import { connect4Game } from "./games/connectFour.ts";
@@ -20,54 +17,17 @@ if (false) {
 	const m = await getOpenAIModels();
 	console.log(m.map((model) => model.id).join("\n"));
 }
-console.log([
-	models[LanguageModelName["o3 mini high"]],
-	models[LanguageModelName["o3 mini low"]],
-]);
 
 if (true) {
-	const questions = [
-		// "Who's the most intelligent character in all of fiction?",
-		"What's the most important thing a country can have to grow?"
-	];
-
-	const benchmark_models: LanguageModel[] = [
+	const r = await benchmarkAidanbench([
 		models[LanguageModelName["GPT-4o mini"]],
 		models[LanguageModelName["GPT-4o"]],
-	];
+	]);
 
-	const results = [];
-
-	for (let i = 0; i < questions.length; i++) {
-		const question = questions[i];
-		results.push(question);
-
-		for (let j = 0; j < benchmark_models.length; j++) {
-			const model = benchmark_models[j];
-
-			console.log(question);
-			console.log(model.name);
-
-			const r = await gameLoop(
-				aidanbenchGame,
-				model,
-				question,
-			);
-
-			results.push([
-				{
-					name: model.name,
-					question,
-					answers: {
-						count: r.state.responses.length,
-						content: r.state.responses,
-					},
-				},
-			]);
-		}
-	}
-
-	console.log(JSON.stringify(results, null, "\t"));
+	await Deno.writeTextFile(
+		"out/aidanbench_results.json",
+		JSON.stringify(r, null, "\t"),
+	);
 }
 
 if (false) {
