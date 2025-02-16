@@ -3,6 +3,7 @@ import { gameLoop, multiplayerGameLoop } from "./gameLoop.ts";
 import { aidanbenchGame } from "./games/aidanbench.ts";
 import { connect4Game } from "./games/connectFour.ts";
 import { texasHoldEm } from "./games/poker.ts";
+import { snakeGame } from "./games/snake.ts";
 import { ticTacToeGame } from "./games/ticTacToe.ts";
 import { initializeWordleState, wordleGame } from "./games/wordle.ts";
 import {
@@ -18,14 +19,24 @@ if (false) {
 	console.log(m.map((model) => model.id).join("\n"));
 }
 
+if (false) {
+	const r = await multiplayerGameLoop(snakeGame, [
+		models[LanguageModelName["o3 mini"]],
+		models[LanguageModelName["o3 mini"]],
+	], 2);
+
+	console.log(r.state);
+}
+
 if (true) {
 	const r = await benchmarkAidanbench([
 		models[LanguageModelName["GPT-4o mini"]],
 		models[LanguageModelName["GPT-4o"]],
+		models[LanguageModelName["o3 mini low"]]
 	]);
 
 	await Deno.writeTextFile(
-		"out/aidanbench_results.json",
+		"out/aidanbench_j_results.json",
 		JSON.stringify(r, null, "\t"),
 	);
 }
@@ -76,6 +87,7 @@ if (false) {
 			models[LanguageModelName["o3 mini"]],
 			models[LanguageModelName["o3 mini"]],
 		],
+		null
 	);
 
 	console.log(run.state);
@@ -89,6 +101,7 @@ if (false) {
 			models[LanguageModelName["o3 mini high"]],
 			models[LanguageModelName["o3 mini high"]],
 		],
+		null,
 	);
 }
 
@@ -98,7 +111,7 @@ if (false) {
 			models[LanguageModelName["o3 mini"]],
 			models[LanguageModelName["o3 mini"]],
 		];
-		const run = await multiplayerGameLoop(ticTacToeGame, competitors);
+		const run = await multiplayerGameLoop(ticTacToeGame, competitors, null);
 
 		await logMultiplayerGameResult(
 			run.status,

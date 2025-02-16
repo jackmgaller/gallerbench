@@ -154,11 +154,12 @@ export const gameLoop = async <GameState extends object>(
 export const multiplayerGameLoop = async <GameState extends object>(
 	game: MultiplayerGame<GameState>,
 	models: LanguageModel[],
+	stateOptions: any,
 	gptOptions?: Partial<GPTOptions | AnthropicOptions>,
 ) => {
 	const chats: ChatMessage[][] = models.map(() => []);
 	let status = GameStatus.Ongoing;
-	let state = game.initializeState();
+	let state = game.initializeState(stateOptions);
 
 	// Loop until the game status is not ongoing.
 	while (status === GameStatus.Ongoing) {

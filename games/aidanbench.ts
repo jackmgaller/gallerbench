@@ -1,7 +1,7 @@
 // File: games/aidanbench.ts
 
+import { LanguageModelName, models } from "../models.ts";
 import { Game, GameStatus } from "../types.ts";
-import { LanguageModel, LanguageModelName, models } from "../models.ts";
 
 // ------------------------
 // AidanBench State & Types
@@ -123,7 +123,10 @@ export async function computeCoherence(
 	// Use the judge model (o1-mini) from our models mapping.
 	const judgeModel = models[LanguageModelName["GPT-4o"]];
 	const chatMessages = [{ role: "user", content: judgePrompt }];
-	const response = await judgeModel.complete(chatMessages);
+	const response = await judgeModel.complete(chatMessages, {
+		temperature: .5,
+		top_p: .05,
+	});
 
 	// Extract the number from the XML tags using a regular expression.
 	const match = response.content.trim().match(

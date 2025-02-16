@@ -2,21 +2,41 @@
 	[
 		{
 			"role": "user",
-			"content": "You are playing Connect 4 as \"X\".\nThe board is currently:\n\n. | . | . | . | . | . | .\n. | . | . | . | . | . | .\n. | . | . | . | . | . | .\n. | . | . | . | . | . | .\n. | . | . | . | . | . | .\n. | . | . | . | . | . | .\n1   2   3   4   5   6   7\n\nPlease enter the column number (1-7) where you would like to drop your piece:"
+			"content": "You are controlling a snake on a 10×10 board.\nHere is the current map:\n. . . . A . . . . .\n. . . . . . . . . .\n. . 1 A . 2 . . . .\n. . . . . . . . . .\n. . . . . . . . . .\n. . . . . . . . . .\n. . . . . . . . . .\n. . . . . . . . . .\n. . . . . . . . . .\n. . . A . . . . . .\n\nYour snake’s head is at (2, 2).\nPlease provide your next move: up, down, left, or right."
 		},
 		{
 			"role": "assistant",
-			"content": "2"
+			"content": "Looking at the board, your snake’s head is at (2,2) (remember that rows and columns start at 0 so row 2 is the third row), and you have an apple right next door at (2,3). Moving right will immediately let you grab that apple, and it appears to be a safe cell.\n\nSo, my move is: right.",
+			"refusal": null
+		},
+		{
+			"role": "user",
+			"content": "It's your turn.\nHere is the current map:\nA . . . A . . . . .\n. . . . . 2 . . . .\n. . ~ 1 . . . . . .\n. . . . . . . . . A\n. . . . . . . . . A\n. . . . . . . . . .\n. . . . . . . . . .\n. . . . . . . . . .\n. . . . . . . . . .\n. . . A . . . . . .\n\nYour snake’s head is at (3, 2).\nEnter your move (up, down, left, or right):"
+		},
+		{
+			"role": "assistant",
+			"content": "Let’s analyze the situation. Your snake’s head is at (3,2). The four adjacent squares are:\n\n• Up: (2,2) – This cell contains a “~”, which appears to be water or an obstacle that you’d prefer not to navigate.\n\n• Down: (4,2) – This cell is empty (a “.”), so it’s safe but doesn’t immediately help you get toward any of the apples (they’re all in upper rows or far right).\n\n• Left: (3,1) – This cell is empty. Going left might allow you to maneuver upward from a different approach since the apple at (0,0) (or the one at (0,4)) is closer if you avoid the water obstacle.\n\n• Right: (3,3) – Again, safe, but moving right won’t help much since the nearest apples are in the upper area, and moving right would eventually force you to approach through the row with water as well.\n\nGiven that the up direction is blocked by water and down/reight don’t head efficiently toward the apples (that are in row 0), heading left to (3,1) is the best choice—it lets you bypass the water and then potentially move upward toward the apple at (0,0) or (0,4).\n\nTherefore, my move is: left.",
+			"refusal": null
 		}
 	],
 	[
 		{
 			"role": "user",
-			"content": "You are playing Connect 4 as \"O\".\nThe board is currently:\n\n. | . | . | . | . | . | .\n. | . | . | . | . | . | .\n. | . | . | . | . | . | .\n. | . | . | . | . | . | .\n. | . | . | . | . | . | .\n. | X | . | . | . | . | .\n1   2   3   4   5   6   7\n\nPlease enter the column number (1-7) where you would like to drop your piece:"
+			"content": "You are controlling a snake on a 10×10 board.\nHere is the current map:\n. . . . A . . . . .\n. . . . . . . . . .\n. . 1 A . 2 . . . .\n. . . . . . . . . .\n. . . . . . . . . .\n. . . . . . . . . .\n. . . . . . . . . .\n. . . . . . . . . .\n. . . . . . . . . .\n. . . A . . . . . .\n\nYour snake’s head is at (5, 2).\nPlease provide your next move: up, down, left, or right."
 		},
 		{
 			"role": "assistant",
-			"content": "5"
+			"content": "The board shows several apples (letters “A”) and parts of other snakes (the numbers “1” and “2”). Your snake’s head is at (5,2) – meaning column 5, row 2. Looking at the surrounding cells (with rows counted top‐to‐bottom and columns left‐to‐right):\n\n• Up from (5,2) is (5,1), and the top row shows an “A” in column 5. That means moving up would let you grab an apple, which is usually advantageous.\n\n• Down (5,3), Left (4,2), and Right (6,2) all appear to be empty.\n\nSince grabbing an apple is useful and safe, the best move is to go up.\n\nAnswer: up.",
+			"refusal": null
+		},
+		{
+			"role": "user",
+			"content": "It's your turn.\nHere is the current map:\nA . . . A . . . . .\n. . . . . 2 . . . .\n. . ~ 1 . . . . . .\n. . . . . . . . . A\n. . . . . . . . . A\n. . . . . . . . . .\n. . . . . . . . . .\n. . . . . . . . . .\n. . . . . . . . . .\n. . . A . . . . . .\n\nYour snake’s head is at (5, 1).\nEnter your move (up, down, left, or right):"
+		},
+		{
+			"role": "assistant",
+			"content": "Looking at the board, we note the following:\n\n• The board’s rows and columns are numbered from 1 (top/left) to 10 (bottom/right). Your snake’s head is at (5, 1) – meaning column 5, row 1.\n\n• Row 1 shows two A’s: one at column 1 and one at column 5. Since your snake’s head occupies (5, 1), the A at that cell is assumed to have been (or is being) consumed by you. The remaining apple on row 1 is at (1, 1).\n\n• Other apples are farther away (for example, one at (10, 4) and one at (10, 5)), and there are also enemy snake parts (the “1” and “2”) and a tilde “~” obstacle in later rows.\n\nGiven that (1, 1) is the closest apple now, a natural strategy is to proceed toward it. To do that, the Manhattan distance from your current head at (5, 1) to the apple at (1, 1) is |5–1| + |1–1| = 4 moves left. \n\nChecking your immediate available moves from (5, 1):\n\n• Up: Not allowed (off the board).  \n• Down: Moves to (5, 2) which is a safe empty cell, but it doesn’t head in the direction of (1, 1).  \n• Right: Moves to (6, 1) and takes you farther from (1, 1).  \n• Left: Moves to (4, 1), which is safe and brings you closer to the target apple.\n\nTherefore, the best move is to go left.\n\nEnter your move: left.",
+			"refusal": null
 		}
 	]
 ]
