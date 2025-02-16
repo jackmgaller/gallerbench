@@ -1,8 +1,13 @@
 import { Game, GameStatus } from "../types.ts";
 
+type WordleState = {
+	guesses: string[];
+	solution: string;
+};
+
 export const initializeWordleState = (
 	solution: string,
-): { guesses: string[]; solution: string } => {
+): WordleState => {
 	return {
 		guesses: [],
 		solution,
@@ -67,7 +72,7 @@ const turnPrompt = (state: { guesses: string[]; solution: string }): string => {
 };
 
 // Define games with their specific update logic
-export const wordleGame: Game<{ guesses: string[]; solution: string }> = {
+export const wordleGame: Game<WordleState, string> = {
 	name: "Wordle",
 	version: 1.5,
 	prompts: {

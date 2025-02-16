@@ -1,6 +1,11 @@
 import { Game, GameStatus } from "../types.ts";
 
-export const guessNumberGame: Game<{ guesses: number[]; target: number }> = {
+type GuessNumberGameState = {
+	guesses: number[];
+	target: number;
+};
+
+export const guessNumberGame: Game<GuessNumberGameState, number> = {
 	name: "Guess The Number",
 	answerParserPrompt:
 		"You are judging an AI program playing a number guessing game, you will tell me, and *nothing else*, what number the AI program has guessed. Anything else returned, whitespace, quotes, etc. will break the program.",

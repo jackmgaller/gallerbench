@@ -32,16 +32,16 @@ if (true) {
 	const r = await benchmarkAidanbench([
 		models[LanguageModelName["GPT-4o mini"]],
 		models[LanguageModelName["GPT-4o"]],
-		models[LanguageModelName["o3 mini low"]]
+		models[LanguageModelName["o3 mini low"]],
 	]);
 
 	await Deno.writeTextFile(
-		"out/aidanbench_j_results.json",
+		"out/aidanbench_j2_results.json",
 		JSON.stringify(r, null, "\t"),
 	);
 }
 
-if (false) {
+if (true) {
 	// Select the models you want to test.
 	const testModels: LanguageModel[] = [
 		models[LanguageModelName["o1 mini"]],
@@ -58,15 +58,15 @@ if (false) {
 		);
 	const stateGenerator = () => {
 		const randomWord = words[Math.floor(Math.random() * words.length)];
-		return initializeWordleState(randomWord);
+		return randomWord;
 	};
 
 	// Run the benchmark.
 	const benchmarkResults = await benchmarkGame(
 		wordleGame,
 		testModels,
-		iterations,
 		stateGenerator,
+		iterations
 	);
 
 	// Output the results.
@@ -87,7 +87,7 @@ if (false) {
 			models[LanguageModelName["o3 mini"]],
 			models[LanguageModelName["o3 mini"]],
 		],
-		null
+		null,
 	);
 
 	console.log(run.state);

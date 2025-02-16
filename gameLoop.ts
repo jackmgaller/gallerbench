@@ -69,6 +69,7 @@ const getParsedResponse = async (
  * Extra options for running a game loop.
  */
 export type GameLoopOptions = {
+	useAnswerParser?: boolean;
 	quiet?: boolean;
 	delay?: number;
 	gptOptions?: Partial<GPTOptions | AnthropicOptions>;
@@ -77,10 +78,13 @@ export type GameLoopOptions = {
 /**
  * Single-player game loop.
  */
-export const gameLoop = async <GameState extends object>(
-	game: Game<GameState>,
+export const gameLoop = async <
+	GameState extends object,
+	StateOptions extends unknown,
+>(
+	game: Game<GameState, StateOptions>,
 	model: LanguageModel,
-	stateOptions: any,
+	stateOptions: StateOptions,
 	options?: GameLoopOptions,
 ) => {
 	const chat: ChatMessage[] = [];
@@ -103,11 +107,16 @@ export const gameLoop = async <GameState extends object>(
 	}
 	chat.push(response);
 
-	let parsedAnswer = await getParsedResponse(
-		game.answerParserPrompt,
-		response.content,
+	state = await game.updateState(
+		state,
+		game.answerParserPrompt
+			? await getParsedResponse(
+				game.answerParserPrompt,
+				response.content,
+			)
+			: response.content,
 	);
-	state = await game.updateState(state, parsedAnswer);
+	
 	let status: GameStatus = await game.evaluateStatus(state);
 
 	// Main game loop.
@@ -126,11 +135,15 @@ export const gameLoop = async <GameState extends object>(
 		}
 		chat.push(response);
 
-		parsedAnswer = await getParsedResponse(
-			game.answerParserPrompt,
-			response.content,
+		state = await game.updateState(
+			state,
+			game.answerParserPrompt
+				? await getParsedResponse(
+					game.answerParserPrompt,
+					response.content,
+				)
+				: response.content,
 		);
-		state = await game.updateState(state, parsedAnswer);
 		status = await game.evaluateStatus(state);
 
 		if (options?.delay) {
@@ -151,10 +164,13 @@ export const gameLoop = async <GameState extends object>(
 /**
  * Multiplayer game loop.
  */
-export const multiplayerGameLoop = async <GameState extends object>(
-	game: MultiplayerGame<GameState>,
+export const multiplayerGameLoop = async <
+	GameState extends object,
+	StateOptions,
+>(
+	game: MultiplayerGame<GameState, StateOptions>,
 	models: LanguageModel[],
-	stateOptions: any,
+	stateOptions: StateOptions,
 	gptOptions?: Partial<GPTOptions | AnthropicOptions>,
 ) => {
 	const chats: ChatMessage[][] = models.map(() => []);
@@ -206,10 +222,10 @@ export const multiplayerGameLoop = async <GameState extends object>(
 			logChatMessage(response, model.name);
 			chats[player].push(response);
 
-			const parsedAnswer = await getParsedResponse(
+			const parsedAnswer = game.answerParserPrompt ? await getParsedResponse(
 				game.answerParserPrompt,
 				response.content,
-			);
+			) : response.content;
 			state = await game.updateState(state, parsedAnswer, player);
 			status = await game.evaluateStatus(state);
 

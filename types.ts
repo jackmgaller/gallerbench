@@ -1,4 +1,3 @@
-// Define the shared interfaces and types
 export enum GameStatus {
 	Win = "Win",
 	Loss = "Loss",
@@ -6,16 +5,20 @@ export enum GameStatus {
 	Ongoing = "Ongoing",
 }
 
-export type Game<GameState extends object = Record<string, unknown>> = {
+export type Game<
+	GameState extends object = Record<string, unknown>,
+	StateOptions = unknown,
+> = {
 	name: string;
 	prompts: {
 		first: string | ((state: GameState) => string);
 		turn: string | ((state: GameState) => string);
 	};
 	evaluateStatus: (state: GameState) => GameStatus | Promise<GameStatus>;
-	answerParserPrompt: string;
+	answerParserPrompt?: string;
 	version: number;
-	initializeState: (...args: any[]) => GameState;
+	// Now the initializer takes a parameter of type StateOptions
+	initializeState: (options: StateOptions) => GameState;
 	updateState: (
 		state: GameState,
 		parsedAnswer: string,
@@ -23,18 +26,19 @@ export type Game<GameState extends object = Record<string, unknown>> = {
 	) => GameState;
 };
 
-export type MultiplayerGame<GameState extends object> =
-	& Omit<Game<GameState>, "prompts">
-	& {
-		players: number | "dynamic";
-		prompts: {
-			first:
-				| string
-				| ((state: GameState, currentPlayer: number) => string);
-			turn:
-				| string
-				| ((state: GameState, currentPlayer: number) => string);
-		};
-		shouldSkip?: (state: GameState, currentPlayer: number) => boolean;
-		winner: (state: GameState) => number;
+export type MultiplayerGame<
+	GameState extends object,
+	StateOptions = unknown,
+> = Omit<Game<GameState, StateOptions>, "prompts"> & {
+	players: number | "dynamic";
+	prompts: {
+		first:
+			| string
+			| ((state: GameState, currentPlayer: number) => string);
+		turn:
+			| string
+			| ((state: GameState, currentPlayer: number) => string);
 	};
+	shouldSkip?: (state: GameState, currentPlayer: number) => boolean;
+	winner: (state: GameState) => number;
+};

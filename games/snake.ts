@@ -79,7 +79,7 @@ function boardToString(state: SnakeGameState): string {
 // MultiplayerGame Definition
 //
 
-export const snakeGame: MultiplayerGame<SnakeGameState> = {
+export const snakeGame: MultiplayerGame<SnakeGameState, number> = {
 	name: "Competitive Snake",
 	version: 1.0,
 	// The number of players will be determined at runtime.

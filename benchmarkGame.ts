@@ -25,11 +25,11 @@ type BenchmarkOutput = {
  * @param options - (Optional) Additional game loop options
  * @returns An array of results, each containing the LLM instance, win count, total games played, and win rate.
  */
-export async function benchmarkGame<GameState extends object>(
-	game: Game<GameState>,
+export async function benchmarkGame<GameState extends object, GameParams extends unknown>(
+	game: Game<GameState, GameParams>,
 	models: LanguageModel[],
+	gameParams: GameParams|(() => GameParams),
 	iterations: number,
-	stateGenerator: () => GameState,
 	options?: Parameters<typeof gameLoop>[3], // Using gameLoop options type
 ): Promise<BenchmarkOutput> {
 	// Create a score tracker for each model.
@@ -39,6 +39,10 @@ export async function benchmarkGame<GameState extends object>(
 		total: 0,
 		winRate: 0,
 	}));
+
+	const isFunction = (value: GameParams | (() => GameParams)): value is (() => GameParams) => {
+		return typeof value === 'function' && !('prototype' in value);
+	};
 
 	// Loop for the specified number of iterations.
 	for (let i = 0; i < iterations; i++) {
@@ -50,13 +54,15 @@ export async function benchmarkGame<GameState extends object>(
 			);
 
 			try {
-				// Create a fresh game state for this run.
-				const initialState = stateGenerator();
+				const currentGameParams = isFunction(gameParams) 
+				? gameParams() 
+				: gameParams;
+
 				// Run the game loop for this model.
 				const { status } = await gameLoop(
 					game,
 					model,
-					initialState,
+					currentGameParams,
 					options,
 				);
 				results[j].total++;

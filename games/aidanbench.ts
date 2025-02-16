@@ -175,9 +175,7 @@ const NOVELTY_THRESHOLD = 0.15;
 // AidanBench Game Implementation
 // ------------------------
 
-// Note: Because computeCoherence and computeNovelty are asynchronous, the evaluateStatus
-// function here returns a Promise<GameStatus>. (Your game loop may need to await this.)
-export const aidanbenchGame: Game<AidanBenchState> = {
+export const aidanbenchGame: Game<AidanBenchState, string> = {
 	name: "AidanBench",
 	version: 1.0,
 	prompts: {
@@ -194,8 +192,7 @@ export const aidanbenchGame: Game<AidanBenchState> = {
  \tRemember: The goal is to generate as many different answers as possible—avoid any repetition.`;
 		},
 	},
-	answerParserPrompt:
-		"Extract only the answer text from the response. Do not include any extra commentary.",
+	answerParserPrompt: undefined,
 	initializeState: (question: string): AidanBenchState => {
 		return {
 			question,
