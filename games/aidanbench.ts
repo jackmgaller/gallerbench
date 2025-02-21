@@ -121,11 +121,11 @@ export async function computeCoherence(
   Do not include any additional text in your response.`;
 
 	// Use the judge model (o1-mini) from our models mapping.
-	const judgeModel = models[LanguageModelName["GPT-4o"]];
+	const judgeModel = models[LanguageModelName["o3 mini low"]];
 	const chatMessages = [{ role: "user", content: judgePrompt }];
 	const response = await judgeModel.complete(chatMessages, {
-		temperature: .5,
-		top_p: .05,
+		// temperature: .5,
+		// top_p: .05,
 	});
 
 	// Extract the number from the XML tags using a regular expression.
@@ -154,9 +154,8 @@ export async function computeNovelty(
 ): Promise<number> {
 	if (previous.length === 0) return 1.0;
 	const newEmb = await computeEmbedding(newAnswer);
-	console.log({ vector: newEmb.slice(0, 10) });
 	let maxSim = 0;
-	// In a real-world system you might cache embeddings for previous answers.
+
 	for (const prev of previous) {
 		const prevEmb = await computeEmbedding(prev);
 		const sim = cosineSimilarity(newEmb, prevEmb);
@@ -192,7 +191,7 @@ export const aidanbenchGame: Game<AidanBenchState, string> = {
  \tRemember: The goal is to generate as many different answers as possible—avoid any repetition.`;
 		},
 	},
-	answerParserPrompt: undefined,
+	answerParserPrompt: null,
 	initializeState: (question: string): AidanBenchState => {
 		return {
 			question,
@@ -207,23 +206,25 @@ export const aidanbenchGame: Game<AidanBenchState, string> = {
 	},
 	async evaluateStatus(state: AidanBenchState): Promise<GameStatus> {
 		const lastResponse = state.responses[state.responses.length - 1];
-		console.log("Computing coherence...");
-		const coherence = await computeCoherence(state.question, lastResponse);
-		console.log("Computing novelty...");
-		const novelty = await computeNovelty(
-			lastResponse,
-			state.responses.slice(0, -1),
+		console.log("Computing coherence and novelty");
+	  
+		const coherencePromise = computeCoherence(state.question, lastResponse);
+		const noveltyPromise = computeNovelty(
+		  lastResponse,
+		  state.responses.slice(0, -1),
 		);
-		console.log(
-			`coherence: ${coherence} | novelty: ${novelty.toFixed(2)}`,
-		);
+	  
+		const [coherence, novelty] = await Promise.all([coherencePromise, noveltyPromise]);
+	  
+		console.log(`coherence: ${coherence} | novelty: ${novelty.toFixed(3)}`);
 		if (coherence <= COHERENCE_THRESHOLD || novelty <= NOVELTY_THRESHOLD) {
-			state.responses.forEach((resp, indx) => {
-				console.log(`${indx + 1}. ${resp}`);
-			});
-			console.log(`${state.responses.length} responses in total`);
-			return GameStatus.Win;
+		  state.responses.forEach((resp, indx) => {
+			console.log(`${indx + 1}. ${resp}`);
+		  });
+		  console.log(`${state.responses.length} responses in total`);
+		  return GameStatus.Win;
 		}
 		return GameStatus.Ongoing;
-	},
+	  }
+	  
 };

@@ -28,7 +28,7 @@ if (false) {
 	console.log(r.state);
 }
 
-if (true) {
+if (false) {
 	const r = await benchmarkAidanbench([
 		models[LanguageModelName["GPT-4o mini"]],
 		models[LanguageModelName["GPT-4o"]],
@@ -44,12 +44,13 @@ if (true) {
 if (true) {
 	// Select the models you want to test.
 	const testModels: LanguageModel[] = [
-		models[LanguageModelName["o1 mini"]],
+		models[LanguageModelName["GPT-4o mini"]],
 		models[LanguageModelName["o3 mini low"]],
+		models[LanguageModelName["o3 mini high"]],
 	];
 
 	// Number of iterations per model.
-	const iterations = 5;
+	const iterations = 50;
 
 	// For Wordle, the state generator selects a random word.
 	const words = (await Deno.readTextFile("data/words.txt")).split("\n")

@@ -1,6 +1,6 @@
 // benchmarkSinglePlayerGame.ts
 
-import { gameLoop } from "./gameLoop.ts";
+import { gameLoop, GameLoopOptions } from "./gameLoop.ts";
 import { Game, GameStatus } from "./types.ts";
 import { LanguageModel, LanguageModelName, models } from "./models.ts";
 import { aidanbenchGame } from "./games/aidanbench.ts";
@@ -30,7 +30,7 @@ export async function benchmarkGame<GameState extends object, GameParams extends
 	models: LanguageModel[],
 	gameParams: GameParams|(() => GameParams),
 	iterations: number,
-	options?: Parameters<typeof gameLoop>[3], // Using gameLoop options type
+	options?: GameLoopOptions, // Using gameLoop options type
 ): Promise<BenchmarkOutput> {
 	// Create a score tracker for each model.
 	const results = models.map((model) => ({
