@@ -15,9 +15,8 @@ export type Game<
 		turn: string | ((state: GameState) => string);
 	};
 	evaluateStatus: (state: GameState) => GameStatus | Promise<GameStatus>;
-	answerParserPrompt?: string|null;
+	answerParserPrompt?: string | ((state: GameState) => string) | null;
 	version: number;
-	// Now the initializer takes a parameter of type StateOptions
 	initializeState: (options: StateOptions) => GameState;
 	updateState: (
 		state: GameState,

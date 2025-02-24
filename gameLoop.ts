@@ -1,4 +1,4 @@
-// GameEngine.ts
+// File: gameLoop.ts
 import {
 	AnthropicOptions,
 	GPTOptions,
@@ -10,12 +10,12 @@ import { ChatMessage } from "./models.ts";
 import { Game, GameStatus, MultiplayerGame } from "./types.ts";
 
 /**
- * Sleep helper
+ * Sleep helper.
  */
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
- * Logging helper using Deno's CSS styles
+ * Logging helper using Deno's CSS styles.
  */
 function logChatMessage(message: ChatMessage, modelName?: string) {
 	switch (message.role) {
@@ -54,16 +54,42 @@ function logChatMessage(message: ChatMessage, modelName?: string) {
 const getParsedResponse = async (
 	answerParser: string,
 	input: string,
+	options?: Partial<GPTOptions | AnthropicOptions>,
 ): Promise<string> => {
 	const response = await models[LanguageModelName["GPT-4o"]].complete(
 		[
 			{ role: "system", content: answerParser },
 			{ role: "user", content: input },
 		],
-		{ top_p: 0.01 },
+		{ top_p: 0.01, ...options },
 	);
 	return response.content.trim();
 };
+
+/**
+ * Helper function to get the parsed answer using the answer parser prompt.
+ * It accepts a game (which may have a dynamic answerParserPrompt), the current state, the raw answer,
+ * and any additional GPT options.
+ */
+async function parseAnswer<GameState extends object>(
+	game: {
+		answerParserPrompt?: string | ((state: GameState) => string) | null;
+	},
+	state: GameState,
+	rawAnswer: string,
+	options?: Partial<GPTOptions | AnthropicOptions>,
+): Promise<string> {
+	let parserPrompt: string;
+	if (game.answerParserPrompt) {
+		if (typeof game.answerParserPrompt === "function") {
+			parserPrompt = game.answerParserPrompt(state);
+		} else {
+			parserPrompt = game.answerParserPrompt;
+		}
+		return await getParsedResponse(parserPrompt, rawAnswer, options);
+	}
+	return rawAnswer;
+}
 
 /**
  * Extra options for running a game loop.
@@ -107,16 +133,11 @@ export const gameLoop = async <
 	}
 	chat.push(response);
 
-	state = await game.updateState(
-		state,
-		game.answerParserPrompt
-			? await getParsedResponse(
-				game.answerParserPrompt,
-				response.content,
-			)
-			: response.content,
-	);
-	
+	const parsedFirst = game.answerParserPrompt
+		? await parseAnswer(game, state, response.content, options?.gptOptions)
+		: response.content;
+	state = await game.updateState(state, parsedFirst);
+
 	let status: GameStatus = await game.evaluateStatus(state);
 
 	// Main game loop.
@@ -135,20 +156,22 @@ export const gameLoop = async <
 		}
 		chat.push(response);
 
-		state = await game.updateState(
-			state,
-			game.answerParserPrompt
-				? await getParsedResponse(
-					game.answerParserPrompt,
-					response.content,
-				)
-				: response.content,
-		);
+		const parsedTurn = game.answerParserPrompt
+			? await parseAnswer(
+				game,
+				state,
+				response.content,
+				options?.gptOptions,
+			)
+			: response.content;
+		state = await game.updateState(state, parsedTurn);
 		status = await game.evaluateStatus(state);
 
 		if (options?.delay) {
 			await sleep(options.delay);
 		}
+
+		console.log(chat);
 	}
 
 	console.log(
@@ -222,10 +245,9 @@ export const multiplayerGameLoop = async <
 			logChatMessage(response, model.name);
 			chats[player].push(response);
 
-			const parsedAnswer = game.answerParserPrompt ? await getParsedResponse(
-				game.answerParserPrompt,
-				response.content,
-			) : response.content;
+			const parsedAnswer = game.answerParserPrompt
+				? await parseAnswer(game, state, response.content, gptOptions)
+				: response.content;
 			state = await game.updateState(state, parsedAnswer, player);
 			status = await game.evaluateStatus(state);
 
@@ -252,3 +274,119 @@ export const multiplayerGameLoop = async <
 	console.log(state);
 	return { state, status, winner };
 };
+
+/**
+ * Composite adversarial game loop for games sharing the same state type.
+ *
+ * This loop operates in two phases on a common state T:
+ *
+ * 1. **Generator Phase:**
+ *    The generator game is run (using its prompts, updateState, and evaluateStatus methods)
+ *    until it wins—i.e. until it produces a valid challenge.
+ *
+ * 2. **Solver Phase:**
+ *    Using the same state T (which now contains the challenge), the solver game is run until
+ *    it wins (for example, when the solver produces the correct answer).
+ *
+ * Both generatorGame and solverGame must share the same state type T.
+ */
+export async function adversarialGameLoop<
+	GameState extends object,
+	GeneratorOptions,
+	SolverOptions,
+>(
+	generatorGame: Game<GameState, GeneratorOptions>,
+	solverGame: Game<GameState, SolverOptions>,
+	generatorModel: LanguageModel,
+	solverModel: LanguageModel,
+	generatorParams: GeneratorOptions,
+	options?: { quiet?: boolean; delay?: number; gptOptions?: GPTOptions },
+) {
+	// --- Phase 1: Generator Phase ---
+	const genChat: ChatMessage[] = [];
+	const genVerbose = !(options && options.quiet);
+	let state = generatorGame.initializeState(generatorParams);
+
+	// Send the initial prompt from the generator game.
+	const genInitialPrompt = typeof generatorGame.prompts.first === "string"
+		? generatorGame.prompts.first
+		: generatorGame.prompts.first(state);
+	if (genVerbose) {
+		logChatMessage({ role: "user", content: genInitialPrompt });
+	}
+	genChat.push({ role: "user", content: genInitialPrompt });
+
+	// Run the generator loop until a valid challenge is produced.
+	let generatorResponse = await generatorModel.complete(
+		genChat,
+		options?.gptOptions,
+	);
+	if (genVerbose) {
+		logChatMessage(generatorResponse, generatorModel.name);
+	}
+	genChat.push(generatorResponse);
+	state = await generatorGame.updateState(state, generatorResponse.content);
+	let generatorStatus = await generatorGame.evaluateStatus(state);
+
+	let solChat: ChatMessage[] = [];
+
+	while (generatorStatus === GameStatus.Ongoing) {
+		//1. Generator
+		const genTurnPrompt = typeof generatorGame.prompts.turn === "string"
+			? generatorGame.prompts.turn
+			: generatorGame.prompts.turn(state);
+		genChat.push({
+			content: genTurnPrompt,
+			role: "user",
+		});
+
+		generatorResponse = await generatorModel.complete(
+			genChat,
+			options?.gptOptions,
+		);
+		genChat.push(generatorResponse);
+		console.log("generator_chat", generatorResponse.content);
+
+		state = await generatorGame.updateState(
+			state,
+			generatorResponse.content,
+		);
+
+		//2. Solver
+		const solTurnPrompt = typeof solverGame.prompts.turn === "string"
+			? solverGame.prompts.turn
+			: solverGame.prompts.turn(state);
+
+		//We re-initialize solver chat every time
+		//TODO make option
+		solChat = [{
+			content: solTurnPrompt,
+			role: "user",
+		}];
+
+		console.log(solChat);
+		const solverResponse = await solverModel.complete(
+			solChat,
+			options?.gptOptions,
+		);
+		solChat.push(solverResponse);
+		console.log("solver_chat", solverResponse.content);
+
+		state = await solverGame.updateState(state, solverResponse.content);
+
+		//3. Check correct
+		generatorStatus = await solverGame.evaluateStatus(state);
+	}
+
+	// Optionally write logs for both phases.
+	await Deno.writeTextFile(
+		"out/composite_generator_chat.json",
+		JSON.stringify(genChat, null, "\t"),
+	);
+	await Deno.writeTextFile(
+		"out/composite_solver_chat.json",
+		JSON.stringify(solChat, null, "\t"),
+	);
+
+	return state;
+}

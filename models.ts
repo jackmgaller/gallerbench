@@ -1,5 +1,6 @@
 // models.ts
 import "jsr:@std/dotenv/load";
+import { ModelError } from "./utils/errors.ts";
 
 /**
  * The API key for accessing OpenAI's endpoints.
@@ -119,8 +120,10 @@ export class OpenAIModel extends LanguageModel {
 		);
 		const chatResponse: OpenAIChatResponse = await response.json();
 		if (!chatResponse.choices) {
-			const x = (chatResponse as any).error.message;
-			console.log(response.status, x);
+			const errorMessage = (chatResponse as any).error?.message ||
+				"Unknown OpenAI error";
+			console.log(response.status, errorMessage);
+			throw new ModelError(errorMessage, this.name);
 		}
 		return chatResponse.choices[0].message;
 	}
@@ -175,8 +178,10 @@ export class OpenAIReasoningModel extends OpenAIModel {
 		);
 		const chatResponse: OpenAIChatResponse = await response.json();
 		if (!chatResponse.choices) {
-			const x = (chatResponse as any).error.message;
-			console.log(response.status, x);
+			const errorMessage = (chatResponse as any).error?.message ||
+				"Unknown OpenAI error";
+			console.log(response.status, errorMessage);
+			throw new ModelError(errorMessage, this.name);
 		}
 		return chatResponse.choices[0].message;
 	}
@@ -216,6 +221,10 @@ export class AnthropicModel extends LanguageModel {
 		const chatResponse = await response.json() as AnthropicChatResponse;
 		if (!chatResponse.content) {
 			console.log(chatResponse);
+			throw new ModelError(
+				"Failed to get content from Anthropic API",
+				this.name,
+			);
 		}
 		return {
 			role: "assistant",
@@ -271,6 +280,7 @@ export enum LanguageModelName {
 	"Claude 3 Sonnet",
 	"Claude 3.5 Sonnet",
 	"Claude 3.5 Sonnet (new)",
+	"Claude 3.7 Sonnet",
 	"Claude 3 Opus",
 }
 
@@ -335,6 +345,10 @@ export const models: Record<LanguageModelName, LanguageModel> = {
 	),
 	[LanguageModelName["Claude 3 Opus"]]: new AnthropicModel(
 		"claude-3-opus-20240229",
+	),
+
+	[LanguageModelName["Claude 3.7 Sonnet"]]: new AnthropicModel(
+		"claude-3-7-sonnet-20250219",
 	),
 };
 

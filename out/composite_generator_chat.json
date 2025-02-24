@@ -1,0 +1,20 @@
+[
+	{
+		"role": "user",
+		"content": "Your task: Create a math problem that evaluates exactly to 19. Do not mention the answer."
+	},
+	{
+		"role": "assistant",
+		"content": "Evaluate the following expression, making sure to follow the correct order of operations:\n\n  2^3 + 5 × 3 − 4\n\nGood luck!",
+		"refusal": null
+	},
+	{
+		"content": "The solver solved that problem! Try and generate an even harder math problem which equals 19. You can do calc, trig, linear algebra, discrete math, geometry, or anything you can think of. The important thing is the problems get more and more difficult. Again, be sure not to mention the answer.",
+		"role": "user"
+	},
+	{
+		"role": "assistant",
+		"content": "Consider the 3×3 matrix\n\n  A = [ 2  0 –1 ]\n    [ 4  1  0 ]\n    [ 3 –2  5 ].\n\n(a) Compute the determinant of A.\n\n(b) Compute the trace of A (that is, the sum of its diagonal entries).\n\n(c) Using your results from (a) and (b), evaluate the expression\n  det(A) + tr(A) – 10.\n\nShow all your work.",
+		"refusal": null
+	}
+]

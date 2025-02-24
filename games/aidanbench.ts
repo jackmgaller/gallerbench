@@ -207,24 +207,26 @@ export const aidanbenchGame: Game<AidanBenchState, string> = {
 	async evaluateStatus(state: AidanBenchState): Promise<GameStatus> {
 		const lastResponse = state.responses[state.responses.length - 1];
 		console.log("Computing coherence and novelty");
-	  
+
 		const coherencePromise = computeCoherence(state.question, lastResponse);
 		const noveltyPromise = computeNovelty(
-		  lastResponse,
-		  state.responses.slice(0, -1),
+			lastResponse,
+			state.responses.slice(0, -1),
 		);
-	  
-		const [coherence, novelty] = await Promise.all([coherencePromise, noveltyPromise]);
-	  
+
+		const [coherence, novelty] = await Promise.all([
+			coherencePromise,
+			noveltyPromise,
+		]);
+
 		console.log(`coherence: ${coherence} | novelty: ${novelty.toFixed(3)}`);
 		if (coherence <= COHERENCE_THRESHOLD || novelty <= NOVELTY_THRESHOLD) {
-		  state.responses.forEach((resp, indx) => {
-			console.log(`${indx + 1}. ${resp}`);
-		  });
-		  console.log(`${state.responses.length} responses in total`);
-		  return GameStatus.Win;
+			state.responses.forEach((resp, indx) => {
+				console.log(`${indx + 1}. ${resp}`);
+			});
+			console.log(`${state.responses.length} responses in total`);
+			return GameStatus.Win;
 		}
 		return GameStatus.Ongoing;
-	  }
-	  
+	},
 };

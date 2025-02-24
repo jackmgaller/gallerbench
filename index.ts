@@ -1,11 +1,14 @@
 import { benchmarkAidanbench, benchmarkGame } from "./benchmarkGame.ts";
-import { gameLoop, multiplayerGameLoop } from "./gameLoop.ts";
-import { aidanbenchGame } from "./games/aidanbench.ts";
+import { adversarialGameLoop, multiplayerGameLoop } from "./gameLoop.ts";
 import { connect4Game } from "./games/connectFour.ts";
+import {
+	equationGeneratorGame,
+	equationSolverGame,
+} from "./games/equationGame.ts";
 import { texasHoldEm } from "./games/poker.ts";
 import { snakeGame } from "./games/snake.ts";
 import { ticTacToeGame } from "./games/ticTacToe.ts";
-import { initializeWordleState, wordleGame } from "./games/wordle.ts";
+import { wordleGame } from "./games/wordle.ts";
 import {
 	getOpenAIModels,
 	LanguageModel,
@@ -17,6 +20,21 @@ import { logMultiplayerGameResult } from "./statistics.ts";
 if (false) {
 	const m = await getOpenAIModels();
 	console.log(m.map((model) => model.id).join("\n"));
+}
+
+if (false) {
+	const generatorModel = models[LanguageModelName["o3 mini high"]];
+	const solverModel = models[LanguageModelName["o3 mini high"]];
+
+	const result = await adversarialGameLoop(
+		equationGeneratorGame,
+		equationSolverGame,
+		generatorModel,
+		solverModel,
+		null,
+	);
+
+	console.log(result);
 }
 
 if (false) {
@@ -44,9 +62,8 @@ if (false) {
 if (true) {
 	// Select the models you want to test.
 	const testModels: LanguageModel[] = [
-		models[LanguageModelName["GPT-4o mini"]],
-		models[LanguageModelName["o3 mini low"]],
-		models[LanguageModelName["o3 mini high"]],
+		models[LanguageModelName["Claude 3.5 Sonnet (new)"]],
+		models[LanguageModelName["Claude 3.7 Sonnet"]],
 	];
 
 	// Number of iterations per model.
@@ -67,7 +84,7 @@ if (true) {
 		wordleGame,
 		testModels,
 		stateGenerator,
-		iterations
+		iterations,
 	);
 
 	// Output the results.
