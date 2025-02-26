@@ -17,7 +17,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 /**
  * Logging helper using Deno's CSS styles.
  */
-function logChatMessage(message: ChatMessage, modelName?: string) {
+function logChatMessage(message: ChatMessage, model?: LanguageModel) {
 	switch (message.role) {
 		case "system":
 			console.log(
@@ -27,9 +27,7 @@ function logChatMessage(message: ChatMessage, modelName?: string) {
 			break;
 		case "assistant":
 			console.log(
-				`%c[LLM ${
-					modelName ? "(" + modelName + ")" : ""
-				}]: ${message.content}`,
+				`%c[LLM ${model?.name}]: ${message.content}`,
 				"color: red;",
 			);
 			break;
@@ -129,7 +127,7 @@ export const gameLoop = async <
 	// Get and log the LLM's response.
 	let response = await model.complete(chat, options?.gptOptions);
 	if (verbose) {
-		logChatMessage(response, model.name);
+		logChatMessage(response, model);
 	}
 	chat.push(response);
 
@@ -152,7 +150,7 @@ export const gameLoop = async <
 
 		response = await model.complete(chat, options?.gptOptions);
 		if (verbose) {
-			logChatMessage(response, model.name);
+			logChatMessage(response, model);
 		}
 		chat.push(response);
 
@@ -170,8 +168,6 @@ export const gameLoop = async <
 		if (options?.delay) {
 			await sleep(options.delay);
 		}
-
-		console.log(chat);
 	}
 
 	console.log(
@@ -187,6 +183,13 @@ export const gameLoop = async <
 /**
  * Multiplayer game loop.
  */
+/**
+ * Additional options for multiplayer game loops
+ */
+export type MultiplayerGameLoopOptions = {
+	modelOptions?: Partial<GPTOptions | AnthropicOptions>[];
+};
+
 export const multiplayerGameLoop = async <
 	GameState extends object,
 	StateOptions,
@@ -194,7 +197,7 @@ export const multiplayerGameLoop = async <
 	game: MultiplayerGame<GameState, StateOptions>,
 	models: LanguageModel[],
 	stateOptions: StateOptions,
-	gptOptions?: Partial<GPTOptions | AnthropicOptions>,
+	options?: MultiplayerGameLoopOptions,
 ) => {
 	const chats: ChatMessage[][] = models.map(() => []);
 	let status = GameStatus.Ongoing;
@@ -241,12 +244,15 @@ export const multiplayerGameLoop = async <
 			}
 
 			// Get the model's response and log it.
-			const response = await model.complete(chats[player], gptOptions);
-			logChatMessage(response, model.name);
+			// Determine which options to use for this player
+			const playerOptions = options && options?.modelOptions?.[player] 
+
+			const response = await model.complete(chats[player], playerOptions);
+			logChatMessage(response, model);
 			chats[player].push(response);
 
 			const parsedAnswer = game.answerParserPrompt
-				? await parseAnswer(game, state, response.content, gptOptions)
+				? await parseAnswer(game, state, response.content, playerOptions)
 				: response.content;
 			state = await game.updateState(state, parsedAnswer, player);
 			status = await game.evaluateStatus(state);
@@ -322,7 +328,7 @@ export async function adversarialGameLoop<
 		options?.gptOptions,
 	);
 	if (genVerbose) {
-		logChatMessage(generatorResponse, generatorModel.name);
+		logChatMessage(generatorResponse, generatorModel);
 	}
 	genChat.push(generatorResponse);
 	state = await generatorGame.updateState(state, generatorResponse.content);

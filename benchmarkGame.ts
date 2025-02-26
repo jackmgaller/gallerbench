@@ -2,7 +2,7 @@
 
 import { gameLoop, GameLoopOptions } from "./gameLoop.ts";
 import { Game, GameStatus } from "./types.ts";
-import { LanguageModel, LanguageModelName, models } from "./models.ts";
+import { AnthropicOptions, GPTOptions, LanguageModel, LanguageModelName, models } from "./models.ts";
 import { aidanbenchGame } from "./games/aidanbench.ts";
 import aidanbenchQuestions from "./data/aidanbenchJQuestions.json" with {
 	type: "json",
@@ -25,6 +25,15 @@ type BenchmarkOutput = {
  * @param options - (Optional) Additional game loop options
  * @returns An array of results, each containing the LLM instance, win count, total games played, and win rate.
  */
+/**
+ * Options for benchmarking a game
+ * 
+ * @property modelOptions - An array of model-specific options to use for each model
+ */
+export type BenchmarkOptions = GameLoopOptions & {
+	modelOptions?: Record<number, Partial<GPTOptions | AnthropicOptions>>;
+};
+
 export async function benchmarkGame<
 	GameState extends object,
 	GameParams extends unknown,
@@ -33,7 +42,7 @@ export async function benchmarkGame<
 	models: LanguageModel[],
 	gameParams: GameParams | (() => GameParams),
 	iterations: number,
-	options?: GameLoopOptions, // Using gameLoop options type
+	options?: BenchmarkOptions, // Using extended options type
 ): Promise<BenchmarkOutput> {
 	// Create a score tracker for each model.
 	const results = models.map((model) => ({
@@ -63,12 +72,19 @@ export async function benchmarkGame<
 					? gameParams()
 					: gameParams;
 
+				// Get model-specific options if provided
+				const modelSpecificOptions = options?.modelOptions?.[j];
+				const gameLoopOptions: GameLoopOptions = {
+					...options,
+					gptOptions: modelSpecificOptions || options?.gptOptions,
+				};
+
 				// Run the game loop for this model.
 				const { status } = await gameLoop(
 					game,
 					model,
 					currentGameParams,
-					options,
+					gameLoopOptions,
 				);
 				results[j].total++;
 				if (status === GameStatus.Win) {

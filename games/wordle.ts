@@ -77,7 +77,14 @@ export const wordleGame: Game<WordleState, string> = {
 	version: 1.5,
 	prompts: {
 		first:
-			`You are playing Wordle. You will guess the word. For each try, you propose a five letter English word to guess the target. Only common English words are allowed. You cannot propose words that do not exist. You cannot propose proper names. You cannot propose acronyms. You only have six tries, so you must use your suggestions wisely to discern as many clues as possible.\n\nWhat is your first guess?`,
+			`You are playing Wordle. You will guess the word. For each try, you propose a five letter English word to guess the target. Only common English words are allowed.
+			
+* You cannot propose words that do not exist.
+* You cannot propose proper names.
+* You cannot propose acronyms.
+* You can only use five letter words.
+
+You only have six tries, so you must use your suggestions wisely to discern as many clues as possible.\n\nWhat is your first guess?`,
 		turn: turnPrompt,
 	},
 	evaluateStatus: ({ guesses, solution }) => {

@@ -62,12 +62,13 @@ if (false) {
 if (true) {
 	// Select the models you want to test.
 	const testModels: LanguageModel[] = [
-		models[LanguageModelName["Claude 3.5 Sonnet (new)"]],
+		models[LanguageModelName["Claude 3.7 Sonnet"]],
+		models[LanguageModelName["Claude 3.7 Sonnet"]],
 		models[LanguageModelName["Claude 3.7 Sonnet"]],
 	];
 
 	// Number of iterations per model.
-	const iterations = 50;
+	const iterations = 10;
 
 	// For Wordle, the state generator selects a random word.
 	const words = (await Deno.readTextFile("data/words.txt")).split("\n")
@@ -79,19 +80,27 @@ if (true) {
 		return randomWord;
 	};
 
-	// Run the benchmark.
+	// Run the benchmark with different max_tokens settings for each model
 	const benchmarkResults = await benchmarkGame(
 		wordleGame,
 		testModels,
 		stateGenerator,
 		iterations,
+		{
+			modelOptions: {
+				0: { max_tokens: 128 },  // First model with limited tokens
+				1: { max_tokens: 1024 }, // Second model with more tokens
+				2: { max_tokens: 3000 }, // Second model with more tokens
+			}
+		}
 	);
 
 	// Output the results.
 	console.log("Benchmark Results:");
-	benchmarkResults.forEach(({ model, wins, total, winRate }) => {
+	benchmarkResults.forEach(({ model, wins, total, winRate }, index) => {
+		const tokenLimit = index === 0 ? "64" : "1024";
 		console.log(
-			`${model.name}: ${wins}/${total} wins (${winRate.toFixed(2)}%)`,
+			`${model.name} (max_tokens: ${tokenLimit}): ${wins}/${total} wins (${winRate.toFixed(2)}%)`,
 		);
 	});
 }

@@ -52,13 +52,16 @@ export type GPTReasoningOptions = GPTOptions & {
  * @property top_k - The top-k tokens to consider.
  * @property top_p - Nucleus sampling probability threshold.
  * @property system - System prompt or instructions.
+ * @property max_tokens - Maximum number of tokens to generate.
  */
 export type AnthropicOptions = {
 	temperature?: number;
 	top_k?: number;
 	top_p?: number;
 	system?: string;
+	max_tokens?: number;
 };
+
 
 /**
  * Abstract base class for all language models.
@@ -141,6 +144,7 @@ export class OpenAIReasoningModel extends OpenAIModel {
 	) {
 		super(name);
 	}
+	
 	/**
 	 * Sends a request to OpenAI's API to complete a chat with reasoning options.
 	 *
@@ -194,6 +198,19 @@ export class OpenAIReasoningModel extends OpenAIModel {
  */
 export class AnthropicModel extends LanguageModel {
 	/**
+	 * Creates an instance of AnthropicModel.
+	 *
+	 * @param name - The unique name or identifier for the Anthropic model.
+	 * @param defaultMaxTokens - The default maximum number of tokens for responses.
+	 */
+	constructor(
+		public readonly name: string,
+		public readonly defaultMaxTokens: number = 4000
+	) {
+		super(name);
+	}
+	
+	/**
 	 * Sends a request to Anthropic's API to complete a chat.
 	 *
 	 * @param messages - An array of chat messages forming the conversation.
@@ -204,13 +221,15 @@ export class AnthropicModel extends LanguageModel {
 		messages: ChatMessage[],
 		options?: AnthropicOptions,
 	): Promise<ChatMessage> {
+		const requestOptions = {
+			model: this.name,
+			messages,
+			max_tokens: options?.max_tokens || 4000,
+			...options,
+		};
+		
 		const response = await fetch("https://api.anthropic.com/v1/messages", {
-			body: JSON.stringify({
-				model: this.name,
-				messages,
-				max_tokens: 4000,
-				...options,
-			}),
+			body: JSON.stringify(requestOptions),
 			method: "POST",
 			headers: {
 				"x-api-key": ANTHROPIC_API_KEY ?? "",
