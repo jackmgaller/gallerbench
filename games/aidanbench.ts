@@ -77,8 +77,7 @@ export async function computeCoherence(
 	question: string,
 	answer: string,
 ): Promise<number> {
-	const judgePrompt =
-		`Your task is to evaluate the coherence and plausibility of an answer to a given question.
+	const judgePrompt = `Your task is to evaluate the coherence and plausibility of an answer to a given question.
   
   Question: <question>${question}</question>
   Answer: <answer>${answer}</answer>

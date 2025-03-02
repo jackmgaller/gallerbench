@@ -9,8 +9,7 @@ export const equationGeneratorGame: Game<EquationState, null> = {
 	name: "EquationGeneratorGame",
 	version: 1.0,
 	prompts: {
-		first:
-			"Your task: Create a math problem that evaluates exactly to 19. Do not mention the answer.",
+		first: "Your task: Create a math problem that evaluates exactly to 19. Do not mention the answer.",
 		turn:
 			"The solver solved that problem! Try and generate an even harder math problem which equals 19. You can do calc, trig, linear algebra, discrete math, geometry, or anything you can think of. The important thing is the problems get more and more difficult. Again, be sure not to mention the answer.",
 	},
@@ -39,8 +38,7 @@ export const equationSolverGame: Game<EquationState, string> = {
 		first: equationSolverPrompt,
 		turn: equationSolverPrompt,
 	},
-	answerParserPrompt:
-		"You are an LLM tasked with only returning the answer the user provided",
+	answerParserPrompt: "You are an LLM tasked with only returning the answer the user provided",
 	// The initial state is created using the challenge from the generator.
 	initializeState: (equation: string): EquationState => {
 		return { equation, solved: false };

@@ -37,9 +37,7 @@ function createShuffledDeck(): Card[] {
 		"K",
 		"A",
 	];
-	const deck: Card[] = suits.flatMap((suit) =>
-		values.map((rank) => ({ suit, rank }))
-	);
+	const deck: Card[] = suits.flatMap((suit) => values.map((rank) => ({ suit, rank })));
 	// Shuffle (Fisher–Yates)
 	for (let i = deck.length - 1; i > 0; i--) {
 		const j = Math.floor(Math.random() * (i + 1));
@@ -81,11 +79,8 @@ const buildPrompt = (
 	currentPlayer: number,
 ): string => {
 	const player = state.players[currentPlayer];
-	const community = state.communityCards.length > 0
-		? handToString(state.communityCards)
-		: "None";
-	const prompt =
-		`You are playing Texas Hold 'Em. You're trying to make as much money as possible.
+	const community = state.communityCards.length > 0 ? handToString(state.communityCards) : "None";
+	const prompt = `You are playing Texas Hold 'Em. You're trying to make as much money as possible.
 Your chips: ${player.chips}
 Your hand: ${handToString(player.hand)}
 Community Cards: ${community}
@@ -288,9 +283,7 @@ enum HandRankings {
 // Evaluate a five‐card hand. (Note that a “Royal Flush” is simply a straight flush whose high card is an Ace.)
 function evaluateFiveHand(cards: Card[]): EvaluatedHand {
 	// Get card values (sorted high to low) and the suits.
-	const values = cards.map((card) => rankToValue[card.rank]).sort((a, b) =>
-		b - a
-	);
+	const values = cards.map((card) => rankToValue[card.rank]).sort((a, b) => b - a);
 	const suits = cards.map((card) => card.suit);
 
 	// Check for a flush (all cards the same suit).
@@ -391,9 +384,7 @@ function evaluateFiveHand(cards: Card[]): EvaluatedHand {
 	if (groups[0].count === 2) {
 		if (groups.length > 1 && groups[1].count === 2) {
 			// Two Pair: higher pair, lower pair, then kicker.
-			const pairValues = groups.filter((g) => g.count === 2).map((g) =>
-				g.value
-			)
+			const pairValues = groups.filter((g) => g.count === 2).map((g) => g.value)
 				.sort((a, b) => b - a);
 			const kicker = groups.find((g) => g.count === 1)!.value;
 			return {
@@ -404,9 +395,7 @@ function evaluateFiveHand(cards: Card[]): EvaluatedHand {
 			};
 		} else {
 			// One Pair: the pair and then three kickers.
-			const kickers = groups.filter((g) => g.count === 1).map((g) =>
-				g.value
-			)
+			const kickers = groups.filter((g) => g.count === 1).map((g) => g.value)
 				.sort((a, b) => b - a);
 			return {
 				handRank: HandRankings.OnePair,
@@ -505,9 +494,7 @@ const determineWinner = (state: TexasHoldEmState): number => {
 	}
 
 	console.log(
-		`Best hand: ${bestHand.handName} with tiebreakers ${
-			bestHand.tiebreakers.join(", ")
-		}`,
+		`Best hand: ${bestHand.handName} with tiebreakers ${bestHand.tiebreakers.join(", ")}`,
 	);
 
 	// Return a 1-indexed player number.

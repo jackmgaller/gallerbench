@@ -68,15 +68,12 @@ export const ticTacToeGame: MultiplayerGame<TicTacToeState> = {
 				}'s.\n\n`;
 
 			if (isO) {
-				prompt +=
-					"This means you go second. The opponent player already made the first move. ";
+				prompt += "This means you go second. The opponent player already made the first move. ";
 			} else {
 				prompt += "You get to make the first move! ";
 			}
 
-			prompt += `The board looks like this:\n\n${
-				ticTacToeBoardToString(state.board)
-			}\n\n;`;
+			prompt += `The board looks like this:\n\n${ticTacToeBoardToString(state.board)}\n\n;`;
 
 			prompt += `Where would you like to place your first ${
 				isO ? "O" : "X"
@@ -112,9 +109,7 @@ export const ticTacToeGame: MultiplayerGame<TicTacToeState> = {
 	initializeState: initializeTicTacToeState,
 	updateState: (state: TicTacToeState, parsedAnswer: string) => {
 		// Determine the current player's symbol
-		const currentPlayer = state.turn % 2 === 0
-			? TicTacToeValue.O
-			: TicTacToeValue.X;
+		const currentPlayer = state.turn % 2 === 0 ? TicTacToeValue.O : TicTacToeValue.X;
 
 		// Get the board coordinates from the move map
 		const move = moveMap[parsedAnswer.trim().toLowerCase()];

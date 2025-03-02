@@ -15,9 +15,7 @@ export async function writeCode(modelOutput: string) {
 		console.log(content);
 		console.log();
 
-		const prompt = `Do you want to ${
-			isNew ? "create" : "update"
-		} this file? (y/n): `;
+		const prompt = `Do you want to ${isNew ? "create" : "update"} this file? (y/n): `;
 		const answer = await getUserInput(prompt);
 
 		if (answer.toLowerCase() === "y") {

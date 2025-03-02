@@ -100,9 +100,7 @@ export async function logMultiplayerGameResult(
 
 	// Create an array of model entries.
 	const modelEntries: ModelEntry[] = models.map((m) =>
-		m instanceof OpenAIReasoningModel
-			? { name: m.name, reasoningEffort: m.defaultReasoningEffort }
-			: { name: m.name }
+		m instanceof OpenAIReasoningModel ? { name: m.name, reasoningEffort: m.defaultReasoningEffort } : { name: m.name }
 	);
 
 	const logEntry: MultiplayerLog = {
@@ -132,9 +130,7 @@ export async function calculateWinRate(
 			if ("type" in log && log.type === "single") {
 				return criteria.models?.includes(log.model.name || "");
 			} else if ("type" in log && log.type === "multiplayer") {
-				return log.models.some((entry) =>
-					criteria.models?.includes(entry.name || "")
-				);
+				return log.models.some((entry) => criteria.models?.includes(entry.name || ""));
 			}
 			// Legacy log entry:
 			return criteria.models?.includes(log.model || "");
@@ -142,15 +138,11 @@ export async function calculateWinRate(
 	}
 
 	if (criteria.games) {
-		filteredData = filteredData.filter((log) =>
-			criteria.games?.includes(log.name || "")
-		);
+		filteredData = filteredData.filter((log) => criteria.games?.includes(log.name || ""));
 	}
 
 	if (criteria.versions) {
-		filteredData = filteredData.filter((log) =>
-			criteria.versions?.includes(log.version || 0)
-		);
+		filteredData = filteredData.filter((log) => criteria.versions?.includes(log.version || 0));
 	}
 
 	const totalGames = filteredData.length;

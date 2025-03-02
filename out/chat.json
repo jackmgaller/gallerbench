@@ -5,14 +5,43 @@
 	},
 	{
 		"role": "assistant",
-		"content": "For my first Wordle guess, I'll propose:\n\nSLATE\n\nThis is a strategic first word because it contains several common letters (S, L, A, T, E) which can help identify if any of these letters are in the target word and their positions."
+		"content": "My first guess is **SLATE**.",
+		"refusal": null
 	},
 	{
 		"role": "user",
-		"content": "For guess \"S L A T E\" you got Green Green Grey Grey Yellow.\nIn other words, that's:\nS: Green\nL: Green\nA: Grey\nT: Grey\nE: Yellow\n\nWhat is your next guess?"
+		"content": "For guess \"S L A T E\" you got Grey Yellow Grey Grey Yellow.\nIn other words, that's:\nS: Grey\nL: Yellow\nA: Grey\nT: Grey\nE: Yellow\n\nWhat is your next guess?"
 	},
 	{
 		"role": "assistant",
-		"content": "That's great information! I know:\n- S is in the correct position (1st letter)\n- L is in the correct position (2nd letter)\n- A is not in the word\n- T is not in the word\n- E is in the word but in the wrong position (needs to be moved from 5th position)\n\nFor my second guess, I'll try:\n\nSLEEP\n\nThis maintains the correct S and L positions, and tries E in a new position (3rd) while also checking for two new letters (P at the end)."
+		"content": "Considering the first result:\n\n- **S (grey)** eliminated  \n- **L (yellow)** correct letter, wrong position  \n- **A (grey)** eliminated  \n- **T (grey)** eliminated  \n- **E (yellow)** correct letter, wrong position\n\nThis means we have eliminated **S, A, T**. Letters **L** and **E** are correct but in different positions.\n\nLet’s test a word that fulfills these clues and tries new common letters at new positions:\n\nMy next guess is **LINED**.",
+		"refusal": null
+	},
+	{
+		"role": "user",
+		"content": "For guess \"L I N E D\" you got Yellow Grey Grey Yellow Grey.\nIn other words, that's:\nL: Yellow\nI: Grey\nN: Grey\nE: Yellow\nD: Grey\n\nWhat is your next guess?"
+	},
+	{
+		"role": "assistant",
+		"content": "Let's carefully analyze again from our known information:\n\n- From **SLATE**:\n  - **S** ❌, **A** ❌, **T** ❌. We know these letters are not part of the word.\n  - **L** Yellow (exists, but incorrect position at position 2)\n  - **E** Yellow (exists, but incorrect position at position 5)\n\n- From **LINED**:\n  - **L** Yellow again (position 1 incorrect - previously position 2 also incorrect means L is not at position 1 nor 2)\n  - **I** ❌, **N** ❌, **D** ❌ (letters we can eliminate now)\n  - **E** Yellow again at position 4—previously at position 5 was wrong, now at position 4 again wrong. Thus, **E** is not in positions 4 or 5.\n\nNow that we know:\n- **L** is NOT at positions 1 or 2, thus is at position 3, 4 or 5.\n- **E** is NOT at positions 4 or 5, thus is at position 1, 2 or 3.\n- Eliminated letters: S, A, T, I, N, D.\n- Not tested yet: common letters like R, O, C, U, H, M, P, etc.\n\nLet's pick a word according to these clues carefully, ensuring a new placement of L and E, while checking some common untested letters:\n\nA suitable guess could be **CELLO**, because:\n- C and O are new letters which may further help narrow down possibilities.\n- L is at positions we haven't tested yet (position 3 and/or 4).\n- E is in a new and untested position 2.\n\nTherefore, my next guess is **CELLO**.",
+		"refusal": null
+	},
+	{
+		"role": "user",
+		"content": "For guess \"C E L L O\" you got Grey Green Green Green Grey.\nIn other words, that's:\nC: Grey\nE: Green\nL: Green\nL: Green\nO: Grey\n\nWhat is your next guess?"
+	},
+	{
+		"role": "assistant",
+		"content": "Given this new information:\n\n**CELLO**  \n- **C:** Grey (not in word)  \n- **E:** Green ✅ (position 2 confirmed)  \n- **L:** Green ✅ (position 3 confirmed)  \n- **L:** Green ✅ (position 4 confirmed)  \n- **O:** Grey (not in word)\n\nWe now know the word definitely has this form:  \n`_ E L L _`\n\nFrom previous guesses, we have already eliminated letters:  \n- S, A, T, I, N, D, C, O\n\nThus, available common letters left to fill in positions 1 and 5 include:  \n- H, B, F, G, J, K, M, P, Q, R, U, V, W, X, Y, Z\n\nLet's consider common English words matching `_ E L L _`:  \n- BELLY  \n- JELLY  \n- HELLO\n\n\"Belly,\" \"Jelly,\" and \"Hello\" are our most common options. Of these, \"HELLO\" includes an **H** and two **L**'s (already confirmed to exist). \"BELLY\" and \"JELLY\" involve letters we haven't tested yet.\n\nTo distinguish clearly, let's first guess **BELLY**, since \"B\" and \"Y\" have never been tested and it can help differentiate.\n\nMy next guess is **BELLY**.",
+		"refusal": null
+	},
+	{
+		"role": "user",
+		"content": "For guess \"B E L L Y\" you got Grey Green Green Green Green.\nIn other words, that's:\nB: Grey\nE: Green\nL: Green\nL: Green\nY: Green\n\nWhat is your next guess?"
+	},
+	{
+		"role": "assistant",
+		"content": "We now have these facts:\n\n- Letters confirmed:\n  - position 2: **E**\n  - position 3: **L**\n  - position 4: **L**\n  - position 5: **Y**\n  \nThis gives the definite form: `_ E L L Y`\n\nWe must select position 1 carefully. Reviewing eliminated letters clearly again from previous guesses:\n\n**Eliminated letters:**  \n- From **SLATE:** eliminated S, A, T  \n- From **LINED:** eliminated I, N, D  \n- From **CELLO:** eliminated C, O  \n- From **BELLY:** eliminated B  \n\nThus, we've eliminated letters: `S, A, T, I, N, D, C, O, B`\n\nThe most common and obvious English word matching pattern `_ E L L Y` and not including eliminated letters is clearly:\n\n**JELLY**\n\nMy next guess is: **JELLY**",
+		"refusal": null
 	}
 ]

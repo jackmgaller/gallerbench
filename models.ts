@@ -24,6 +24,21 @@ export type ChatMessage = {
 };
 
 /**
+ * A chunk of a chat message received during streaming.
+ *
+ * @property role - The role of the message sender (if available in the chunk).
+ * @property content - The content fragment of the message.
+ * @property delta - For OpenAI compatibility, contains the incremental content.
+ */
+export type ChatMessageChunk = {
+	role?: string;
+	content?: string;
+	delta?: {
+		content?: string;
+	};
+};
+
+/**
  * Options specific to GPT-based models.
  *
  * @property temperature - Sampling temperature.
@@ -62,7 +77,6 @@ export type AnthropicOptions = {
 	max_tokens?: number;
 };
 
-
 /**
  * Abstract base class for all language models.
  *
@@ -87,6 +101,18 @@ export abstract class LanguageModel {
 		messages: ChatMessage[],
 		options?: GPTOptions | AnthropicOptions,
 	): ChatMessage | Promise<ChatMessage>;
+
+	/**
+	 * Abstract method to stream a chat conversation.
+	 *
+	 * @param messages - An array of chat messages that form the conversation history.
+	 * @param options - Optional parameters to modify model behavior.
+	 * @returns An async iterable of chat message chunks.
+	 */
+	abstract stream?(
+		messages: ChatMessage[],
+		options?: GPTOptions | AnthropicOptions,
+	): AsyncIterable<ChatMessageChunk>;
 }
 
 /**
@@ -125,10 +151,82 @@ export class OpenAIModel extends LanguageModel {
 		if (!chatResponse.choices) {
 			const errorMessage = (chatResponse as any).error?.message ||
 				"Unknown OpenAI error";
-			console.log(response.status, errorMessage);
+			console.log(response, response.status, errorMessage);
 			throw new ModelError(errorMessage, this.name);
 		}
 		return chatResponse.choices[0].message;
+	}
+
+	/**
+	 * Sends a streaming request to OpenAI's API.
+	 *
+	 * @param messages - An array of chat messages forming the conversation.
+	 * @param options - Optional GPT options to control the response.
+	 * @returns An async iterable that yields message chunks as they arrive.
+	 */
+	async *stream(
+		messages: ChatMessage[],
+		options?: GPTOptions,
+	): AsyncIterable<ChatMessageChunk> {
+		const response = await fetch(
+			"https://api.openai.com/v1/chat/completions",
+			{
+				body: JSON.stringify({
+					model: this.name,
+					messages,
+					stream: true,
+					...options,
+				}),
+				method: "POST",
+				headers: {
+					"Authorization": "Bearer " + OPENAI_API_KEY,
+					"Content-Type": "application/json",
+				},
+			},
+		);
+
+		if (!response.ok) {
+			const errorData = await response.json();
+			const errorMessage = errorData.error?.message ||
+				"Unknown OpenAI error";
+			throw new ModelError(errorMessage, this.name);
+		}
+
+		if (!response.body) {
+			throw new ModelError("Response body is null", this.name);
+		}
+
+		const reader = response.body.getReader();
+		const decoder = new TextDecoder("utf-8");
+
+		try {
+			while (true) {
+				const { done, value } = await reader.read();
+				if (done) break;
+
+				const chunk = decoder.decode(value);
+				const lines = chunk.split("\n").filter((line) => line.trim() !== "");
+
+				for (const line of lines) {
+					if (line.startsWith("data: ")) {
+						const data = line.slice(6);
+
+						if (data === "[DONE]") break;
+
+						try {
+							const parsed = JSON.parse(data);
+							if (parsed.choices && parsed.choices.length > 0) {
+								yield parsed.choices[0].delta;
+							}
+						} catch (e) {
+							console.error("Error parsing stream data:", e);
+						}
+					}
+				}
+			}
+		} finally {
+			reader.releaseLock();
+		}
 	}
 }
 
@@ -144,7 +242,7 @@ export class OpenAIReasoningModel extends OpenAIModel {
 	) {
 		super(name);
 	}
-	
+
 	/**
 	 * Sends a request to OpenAI's API to complete a chat with reasoning options.
 	 *
@@ -205,11 +303,11 @@ export class AnthropicModel extends LanguageModel {
 	 */
 	constructor(
 		public readonly name: string,
-		public readonly defaultMaxTokens: number = 4000
+		public readonly defaultMaxTokens: number = 4000,
 	) {
 		super(name);
 	}
-	
+
 	/**
 	 * Sends a request to Anthropic's API to complete a chat.
 	 *
@@ -227,7 +325,7 @@ export class AnthropicModel extends LanguageModel {
 			max_tokens: options?.max_tokens || 4000,
 			...options,
 		};
-		
+
 		const response = await fetch("https://api.anthropic.com/v1/messages", {
 			body: JSON.stringify(requestOptions),
 			method: "POST",
@@ -250,6 +348,84 @@ export class AnthropicModel extends LanguageModel {
 			content: chatResponse.content[0].text,
 		};
 	}
+
+	/**
+	 * Sends a streaming request to Anthropic's API.
+	 *
+	 * @param messages - An array of chat messages forming the conversation.
+	 * @param options - Optional Anthropic options to control the response.
+	 * @returns An async iterable that yields message chunks as they arrive.
+	 */
+	async *stream(
+		messages: ChatMessage[],
+		options?: AnthropicOptions,
+	): AsyncIterable<ChatMessageChunk> {
+		const requestOptions = {
+			model: this.name,
+			messages,
+			max_tokens: options?.max_tokens || 4000,
+			stream: true,
+			...options,
+		};
+
+		const response = await fetch("https://api.anthropic.com/v1/messages", {
+			body: JSON.stringify(requestOptions),
+			method: "POST",
+			headers: {
+				"x-api-key": ANTHROPIC_API_KEY ?? "",
+				"anthropic-version": "2023-06-01",
+				"Content-Type": "application/json",
+			},
+		});
+
+		if (!response.ok) {
+			const errorData = await response.json();
+			throw new ModelError(
+				errorData.error?.message || "Failed to stream from Anthropic API",
+				this.name,
+			);
+		}
+
+		if (!response.body) {
+			throw new ModelError("Response body is null", this.name);
+		}
+
+		const reader = response.body.getReader();
+		const decoder = new TextDecoder("utf-8");
+
+		try {
+			while (true) {
+				const { done, value } = await reader.read();
+				if (done) break;
+
+				const chunk = decoder.decode(value);
+				const lines = chunk.split("\n").filter((line) => line.trim() !== "");
+
+				for (const line of lines) {
+					if (line.startsWith("data: ")) {
+						const data = line.slice(6);
+
+						if (data === "[DONE]") break;
+
+						try {
+							const parsed = JSON.parse(data);
+
+							if (parsed.type === "content_block_delta") {
+								yield {
+									content: parsed.delta?.text,
+									delta: { content: parsed.delta?.text },
+								};
+							}
+						} catch (e) {
+							console.error("Error parsing Anthropic stream data:", e);
+						}
+					}
+				}
+			}
+		} finally {
+			reader.releaseLock();
+		}
+	}
 }
 
 /**
@@ -268,12 +444,53 @@ class Human extends LanguageModel {
 		const move = prompt("What would you like to do, human?\n");
 		return { role: "assistant", content: move ?? "" };
 	}
+
+	/**
+	 * Implementation of the abstract stream method required by LanguageModel.
+	 * Since human interaction isn't streaming, this simply returns the complete response.
+	 * 
+	 * @param messages - An array of chat messages (ignored in this implementation).
+	 * @returns An async iterable that yields a single message chunk.
+	 */
+	async *stream(
+		messages: ChatMessage[],
+		options?: GPTOptions | AnthropicOptions,
+	): AsyncIterable<ChatMessageChunk> {
+		const response = this.complete(messages);
+		yield {
+			content: response.content,
+			delta: { content: response.content }
+		};
+	}
 }
 
 /**
  * A singleton instance representing the human player.
  */
 export const HumanPlayer = new Human("Human");
+
+/**
+ * Helper function to stream responses from an OpenAI model to the console.
+ *
+ * @param model - The OpenAI model to use.
+ * @param messages - The array of chat messages.
+ * @param options - Optional parameters for the model.
+ */
+export async function streamToConsole(
+	model: LanguageModel,
+	messages: ChatMessage[],
+	options?: GPTOptions | AnthropicOptions,
+) {
+	if (!model.stream) {
+		throw new Error(`Model ${model.name} does not support streaming`);
+	}
+
+	const stream = model.stream(messages, options);
+	for await (const chunk of stream) {
+		Deno.stdout.write(new TextEncoder().encode(chunk.delta?.content || chunk.content || ""));
+	}
+	Deno.stdout.write(new TextEncoder().encode("\n"));
+}
 
 /**
  * An enumeration of supported language model names.
@@ -286,6 +503,7 @@ export enum LanguageModelName {
 	"GPT-4o-2024-08-06",
 	"GPT-4o-latest",
 	"GPT-4o mini",
+	"GPT-4.5 preview",
 	"o1 preview",
 	"o1",
 	"o1 high",
@@ -329,6 +547,9 @@ export const models: Record<LanguageModelName, LanguageModel> = {
 
 	// o1 preview uses a standard model.
 	[LanguageModelName["o1 preview"]]: new OpenAIModel("o1-preview"),
+
+	// GPT-4.5
+	[LanguageModelName["GPT-4.5 preview"]]: new OpenAIModel("gpt-4.5-preview"),
 
 	// GPT-4o models.
 	[LanguageModelName["GPT-4o"]]: new OpenAIModel("gpt-4o-2024-05-13"),

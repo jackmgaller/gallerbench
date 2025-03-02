@@ -1,4 +1,5 @@
 import { Game, GameStatus } from "../types.ts";
+import { GameError } from "../utils/errors.ts";
 
 type WordleState = {
 	guesses: string[];
@@ -19,7 +20,7 @@ const scoreGuess = (guess: string, target: string): string => {
 	target = target.toLowerCase();
 
 	if (guess.length !== 5) {
-		throw new Error(`Wordle guess ${guess} is of length ${guess.length}!`);
+		throw new GameError(`Wordle guess ${guess} is of length ${guess.length}!`);
 	}
 
 	const response: (string | null)[] = Array(5).fill("Grey");
@@ -46,15 +47,13 @@ const scoreGuess = (guess: string, target: string): string => {
 	return response.join(" ");
 };
 
-const turnPrompt = (state: { guesses: string[]; solution: string }): string => {
+const turnPrompt = (state: WordleState): string => {
 	const { guesses, solution } = state;
 	const lastGuess = guesses[guesses.length - 1];
 
 	const scoredWordle = scoreGuess(lastGuess, solution);
 
-	let prompt = `For guess "${
-		lastGuess.toUpperCase().split("").join(" ")
-	}" you got ${scoredWordle}.\n`;
+	let prompt = `For guess "${lastGuess.toUpperCase().split("").join(" ")}" you got ${scoredWordle}.\n`;
 
 	prompt += "In other words, that's:\n";
 

@@ -120,8 +120,7 @@ export const connect4Game: MultiplayerGame<Connect4State> = {
 		},
 	},
 	// The answer parser should extract a column number between 1 and 7.
-	answerParserPrompt:
-		"You are analyzing a move in Connect 4. Extract the column number from the player's response. " +
+	answerParserPrompt: "You are analyzing a move in Connect 4. Extract the column number from the player's response. " +
 		"The column number must be an integer between 1 and 7 (inclusive). Return only the number with no extra characters.",
 	initializeState: (): Connect4State => {
 		return {

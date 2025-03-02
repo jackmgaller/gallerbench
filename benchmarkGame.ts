@@ -27,11 +27,11 @@ type BenchmarkOutput = {
  */
 /**
  * Options for benchmarking a game
- * 
+ *
  * @property modelOptions - An array of model-specific options to use for each model
  */
 export type BenchmarkOptions = GameLoopOptions & {
-	modelOptions?: Record<number, Partial<GPTOptions | AnthropicOptions>>;
+	modelOptions?: Partial<GPTOptions | AnthropicOptions>[];
 };
 
 export async function benchmarkGame<
@@ -68,9 +68,7 @@ export async function benchmarkGame<
 			);
 
 			try {
-				const currentGameParams = isFunction(gameParams)
-					? gameParams()
-					: gameParams;
+				const currentGameParams = isFunction(gameParams) ? gameParams() : gameParams;
 
 				// Get model-specific options if provided
 				const modelSpecificOptions = options?.modelOptions?.[j];
@@ -101,9 +99,7 @@ export async function benchmarkGame<
 
 	// Calculate win rates.
 	results.forEach((result) => {
-		result.winRate = result.total > 0
-			? (result.wins / result.total) * 100
-			: 0;
+		result.winRate = result.total > 0 ? (result.wins / result.total) * 100 : 0;
 	});
 
 	return results;

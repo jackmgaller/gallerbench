@@ -1,25 +1,48 @@
-import { benchmarkAidanbench, benchmarkGame } from "./benchmarkGame.ts";
-import { adversarialGameLoop, multiplayerGameLoop } from "./gameLoop.ts";
+import { benchmarkAidanbench } from "./benchmarkGame.ts";
+import { adversarialGameLoop, gameLoop, multiplayerGameLoop } from "./gameLoop.ts";
 import { connect4Game } from "./games/connectFour.ts";
-import {
-	equationGeneratorGame,
-	equationSolverGame,
-} from "./games/equationGame.ts";
-import { texasHoldEm } from "./games/poker.ts";
-import { snakeGame } from "./games/snake.ts";
-import { ticTacToeGame } from "./games/ticTacToe.ts";
+import { equationGeneratorGame, equationSolverGame } from "./games/equationGame.ts";
 import { wordleGame } from "./games/wordle.ts";
-import {
-	getOpenAIModels,
-	LanguageModel,
-	LanguageModelName,
-	models,
-} from "./models.ts";
-import { logMultiplayerGameResult } from "./statistics.ts";
+import { ChatMessage, getOpenAIModels, LanguageModelName, models, streamToConsole } from "./models.ts";
 
 if (false) {
 	const m = await getOpenAIModels();
 	console.log(m.map((model) => model.id).join("\n"));
+}
+
+if (false) {
+	const gpt45 = models[LanguageModelName["GPT-4.5 preview"]];
+
+	const r = await gameLoop(wordleGame, gpt45, "jelly");
+
+	console.log(r);
+}
+
+if (false) {
+	const model = models[LanguageModelName["GPT-4.5 preview"]];
+
+	console.log("Waiting for " + model.name + " response...");
+	const resp = await model.complete([
+		{
+			content:
+				"My girlfriend and I just started watching Twin Peaks. I like pretentious movies and TV shows. What's some stuff I should look for to enhance my viewing experience, you can give very light spoilers if you need to.",
+			role: "user",
+		},
+	]);
+
+	console.log(resp.content);
+}
+
+if (true) {
+	const model = models[LanguageModelName["GPT-4.5 preview"]];
+
+	console.log("Streaming response from " + model.name + "...");
+	await streamToConsole(model, [
+		{
+			content: "Write a short poem about programming in TypeScript.",
+			role: "user",
+		},
+	]);
 }
 
 if (false) {
@@ -38,15 +61,6 @@ if (false) {
 }
 
 if (false) {
-	const r = await multiplayerGameLoop(snakeGame, [
-		models[LanguageModelName["o3 mini"]],
-		models[LanguageModelName["o3 mini"]],
-	], 2);
-
-	console.log(r.state);
-}
-
-if (false) {
 	const r = await benchmarkAidanbench([
 		models[LanguageModelName["GPT-4o mini"]],
 		models[LanguageModelName["GPT-4o"]],
@@ -59,68 +73,6 @@ if (false) {
 	);
 }
 
-if (true) {
-	// Select the models you want to test.
-	const testModels: LanguageModel[] = [
-		models[LanguageModelName["Claude 3.7 Sonnet"]],
-		models[LanguageModelName["Claude 3.7 Sonnet"]],
-		models[LanguageModelName["Claude 3.7 Sonnet"]],
-	];
-
-	// Number of iterations per model.
-	const iterations = 10;
-
-	// For Wordle, the state generator selects a random word.
-	const words = (await Deno.readTextFile("data/words.txt")).split("\n")
-		.filter(
-			Boolean,
-		);
-	const stateGenerator = () => {
-		const randomWord = words[Math.floor(Math.random() * words.length)];
-		return randomWord;
-	};
-
-	// Run the benchmark with different max_tokens settings for each model
-	const benchmarkResults = await benchmarkGame(
-		wordleGame,
-		testModels,
-		stateGenerator,
-		iterations,
-		{
-			modelOptions: {
-				0: { max_tokens: 128 },  // First model with limited tokens
-				1: { max_tokens: 1024 }, // Second model with more tokens
-				2: { max_tokens: 3000 }, // Second model with more tokens
-			}
-		}
-	);
-
-	// Output the results.
-	console.log("Benchmark Results:");
-	benchmarkResults.forEach(({ model, wins, total, winRate }, index) => {
-		const tokenLimit = index === 0 ? "64" : "1024";
-		console.log(
-			`${model.name} (max_tokens: ${tokenLimit}): ${wins}/${total} wins (${winRate.toFixed(2)}%)`,
-		);
-	});
-}
-
-if (false) {
-	const run = await multiplayerGameLoop(
-		texasHoldEm,
-		[
-			models[LanguageModelName["o3 mini"]],
-			models[LanguageModelName["o3 mini"]],
-			models[LanguageModelName["o3 mini"]],
-			models[LanguageModelName["o3 mini"]],
-		],
-		null,
-	);
-
-	console.log(run.state);
-	console.log(run.winner);
-}
-
 if (false) {
 	const run = await multiplayerGameLoop(
 		connect4Game,
@@ -130,21 +82,4 @@ if (false) {
 		],
 		null,
 	);
-}
-
-if (false) {
-	for (let i = 0; i < 3; i++) {
-		const competitors: LanguageModel[] = [
-			models[LanguageModelName["o3 mini"]],
-			models[LanguageModelName["o3 mini"]],
-		];
-		const run = await multiplayerGameLoop(ticTacToeGame, competitors, null);
-
-		await logMultiplayerGameResult(
-			run.status,
-			ticTacToeGame,
-			competitors,
-			run.winner,
-		);
-	}
 }

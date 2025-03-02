@@ -167,9 +167,7 @@ Enter your move (up, down, left, or right):`;
 		snake.pendingMove = move;
 
 		// Check if all alive snakes have submitted their move.
-		const allMovesCollected = state.snakes.every((s) =>
-			!s.alive || s.pendingMove
-		);
+		const allMovesCollected = state.snakes.every((s) => !s.alive || s.pendingMove);
 		if (allMovesCollected) {
 			// --- Process simultaneous moves ---
 			// Compute each snake's new head position based on its pending move.
@@ -208,9 +206,7 @@ Enter your move (up, down, left, or right):`;
 			// if not eating (and length > 1) the tail will be removed, so exclude it.
 			const effectiveBodies: Position[][] = state.snakes.map((s, i) => {
 				if (!s.alive) return [];
-				return isEating[i] || s.body.length <= 1
-					? s.body
-					: s.body.slice(0, s.body.length - 1);
+				return isEating[i] || s.body.length <= 1 ? s.body : s.body.slice(0, s.body.length - 1);
 			});
 
 			// Build a map of new head positions to detect head-to-head collisions.

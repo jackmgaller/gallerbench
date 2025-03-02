@@ -1,11 +1,5 @@
 // File: gameLoop.ts
-import {
-	AnthropicOptions,
-	GPTOptions,
-	LanguageModel,
-	LanguageModelName,
-	models,
-} from "./models.ts";
+import { AnthropicOptions, GPTOptions, LanguageModel, LanguageModelName, models } from "./models.ts";
 import { ChatMessage } from "./models.ts";
 import { Game, GameStatus, MultiplayerGame } from "./types.ts";
 
@@ -116,9 +110,7 @@ export const gameLoop = async <
 	let state = game.initializeState(stateOptions);
 
 	// Log and send the initial prompt.
-	const initialPrompt = typeof game.prompts.first === "string"
-		? game.prompts.first
-		: game.prompts.first(state);
+	const initialPrompt = typeof game.prompts.first === "string" ? game.prompts.first : game.prompts.first(state);
 	if (verbose) {
 		logChatMessage({ role: "user", content: initialPrompt });
 	}
@@ -140,9 +132,7 @@ export const gameLoop = async <
 
 	// Main game loop.
 	while (status === GameStatus.Ongoing) {
-		const turnPrompt = typeof game.prompts.turn === "string"
-			? game.prompts.turn
-			: game.prompts.turn(state);
+		const turnPrompt = typeof game.prompts.turn === "string" ? game.prompts.turn : game.prompts.turn(state);
 		if (verbose) {
 			logChatMessage({ role: "user", content: turnPrompt });
 		}
@@ -233,9 +223,7 @@ export const multiplayerGameLoop = async <
 				);
 				chats[player].push({ role: "user", content: firstPrompt });
 			} else {
-				const turnPrompt = typeof game.prompts.turn === "string"
-					? game.prompts.turn
-					: game.prompts.turn(state, player);
+				const turnPrompt = typeof game.prompts.turn === "string" ? game.prompts.turn : game.prompts.turn(state, player);
 				console.log(
 					`%c[PLAYER ${player + 1} PROMPT]: ${turnPrompt}`,
 					"color: blue;",
@@ -245,7 +233,7 @@ export const multiplayerGameLoop = async <
 
 			// Get the model's response and log it.
 			// Determine which options to use for this player
-			const playerOptions = options && options?.modelOptions?.[player] 
+			const playerOptions = options && options?.modelOptions?.[player];
 
 			const response = await model.complete(chats[player], playerOptions);
 			logChatMessage(response, model);
