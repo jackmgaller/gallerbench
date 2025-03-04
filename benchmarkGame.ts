@@ -4,7 +4,7 @@ import { gameLoop, GameLoopOptions } from "./gameLoop.ts";
 import { Game, GameStatus } from "./types.ts";
 import { AnthropicOptions, GPTOptions, LanguageModel, LanguageModelName, models } from "./models.ts";
 import { aidanbenchGame } from "./games/aidanbench.ts";
-import aidanbenchQuestions from "./data/aidanbenchJQuestions.json" with {
+import aidanbenchQuestions from "./data/aidanbench/aidanbenchJQuestions.json" with {
 	type: "json",
 };
 

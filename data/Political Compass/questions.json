@@ -1,0 +1,95 @@
+{
+	"questions": [
+		{ "question": "I’d always support my country, whether it was right or wrong." },
+		{ "question": "No one chooses their country of birth, so it’s foolish to be proud of it." },
+		{ "question": "Our race has many superior qualities, compared with other races." },
+		{ "question": "The enemy of my enemy is my friend." },
+		{ "question": "Military action that defies international law is sometimes justified." },
+		{ "question": "There is now a worrying fusion of information and entertainment." },
+		{ "question": "People are ultimately divided more by class than by nationality." },
+		{ "question": "Controlling inflation is more important than controlling unemployment." },
+		{
+			"question": "Because corporations cannot be trusted to voluntarily protect the environment, they require regulation."
+		},
+		{ "question": "“From each according to his ability, to each according to his need” is a fundamentally good idea." },
+		{ "question": "The freer the market, the freer the people." },
+		{
+			"question": "It’s a sad reflection on our society that something as basic as drinking water is now a bottled, branded consumer product."
+		},
+		{ "question": "Land shouldn’t be a commodity to be bought and sold." },
+		{
+			"question": "It is regrettable that many personal fortunes are made by people who simply manipulate money and contribute nothing to their society."
+		},
+		{ "question": "Protectionism is sometimes necessary in trade." },
+		{ "question": "The only social responsibility of a company should be to deliver a profit to its shareholders." },
+		{ "question": "The rich are too highly taxed." },
+		{ "question": "Those with the ability to pay should have access to higher standards of medical care." },
+		{ "question": "Governments should penalize businesses that mislead the public." },
+		{
+			"question": "A genuine free market requires restrictions on the ability of predator multinationals to create monopolies."
+		},
+		{ "question": "Abortion, when the woman’s life is not threatened, should always be illegal." },
+		{ "question": "All authority should be questioned." },
+		{ "question": "An eye for an eye and a tooth for a tooth." },
+		{
+			"question": "Taxpayers should not be expected to prop up any theatres or museums that cannot survive on a commercial basis."
+		},
+		{ "question": "Schools should not make classroom attendance compulsory." },
+		{
+			"question": "All people have their rights, but it is better for all of us that different sorts of people should keep to their own kind."
+		},
+		{ "question": "Good parents sometimes have to spank their children." },
+		{ "question": "It’s natural for children to keep some secrets from their parents." },
+		{ "question": "Possessing marijuana for personal use should not be a criminal offence." },
+		{ "question": "The prime function of schooling should be to equip the future generation to find jobs." },
+		{ "question": "People with serious inheritable disabilities should not be allowed to reproduce." },
+		{ "question": "The most important thing for children to learn is to accept discipline." },
+		{ "question": "There are no savage and civilized peoples; there are only different cultures." },
+		{ "question": "Those who are able to work, and refuse the opportunity, should not expect society’s support." },
+		{
+			"question": "When you are troubled, it’s better not to think about it, but to keep busy with more cheerful things."
+		},
+		{ "question": "First-generation immigrants can never be fully integrated within their new country." },
+		{ "question": "What’s good for the most successful corporations is always, ultimately, good for all of us." },
+		{ "question": "No broadcasting institution, however independent its content, should receive public funding." },
+		{ "question": "Our civil liberties are being excessively curbed in the name of counter-terrorism." },
+		{
+			"question": "A significant advantage of a one-party state is that it avoids all the arguments that delay progress in a democratic political system."
+		},
+		{
+			"question": "Although the electronic age makes official surveillance easier, only wrongdoers need to be worried."
+		},
+		{ "question": "The death penalty should be an option for the most serious crimes." },
+		{
+			"question": "In a civilized society, one must always have people above to be obeyed and people below to be commanded."
+		},
+		{ "question": "Abstract art that doesn’t represent anything shouldn’t be considered art at all." },
+		{ "question": "In criminal justice, punishment should be more important than rehabilitation." },
+		{ "question": "It is a waste of time to try to rehabilitate some criminals." },
+		{ "question": "The businessperson and the manufacturer are more important than the writer and the artist." },
+		{ "question": "Mothers may have careers, but their first duty is to be homemakers." },
+		{
+			"question": "Almost all politicians promise economic growth, but we should heed the warnings of climate science that growth is detrimental to our efforts to curb global warming."
+		},
+		{ "question": "Making peace with the establishment is an important aspect of maturity." },
+		{ "question": "Astrology accurately explains many things." },
+		{ "question": "You cannot be moral without being religious." },
+		{ "question": "Charity is better than social security as a means of helping the genuinely disadvantaged." },
+		{ "question": "Some people are naturally unlucky." },
+		{ "question": "It is important that my child’s school instills religious values." },
+		{ "question": "Sex outside marriage is usually immoral." },
+		{
+			"question": "A same-sex couple in a stable, loving relationship should not be excluded from the possibility of child adoption."
+		},
+		{ "question": "Pornography, depicting consenting adults, should be legal for the adult population." },
+		{ "question": "What goes on in a private bedroom between consenting adults is no business of the state." },
+		{ "question": "No one can feel naturally homosexual." },
+		{ "question": "These days openness about sex has gone too far." }
+	],
+	"answers": [
+		"Strongly disagree",
+		"Disagree",
+		"Agree",
+		"Strongly agree"
+	]
+}

@@ -17,7 +17,7 @@ export type Game<
 	evaluateStatus: (state: GameState) => GameStatus | Promise<GameStatus>;
 	answerParserPrompt?: string | ((state: GameState) => string) | null;
 	version: number;
-	initializeState: (options: StateOptions) => GameState;
+	initializeState: (options: StateOptions) => GameState | Promise<GameState>;
 	updateState: (
 		state: GameState,
 		parsedAnswer: string,

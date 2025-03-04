@@ -107,7 +107,7 @@ export const gameLoop = async <
 ) => {
 	const chat: ChatMessage[] = [];
 	const verbose = !(options && options.quiet);
-	let state = game.initializeState(stateOptions);
+	let state = await game.initializeState(stateOptions);
 
 	// Log and send the initial prompt.
 	const initialPrompt = typeof game.prompts.first === "string" ? game.prompts.first : game.prompts.first(state);
@@ -117,7 +117,9 @@ export const gameLoop = async <
 	chat.push({ role: "user", content: initialPrompt });
 
 	// Get and log the LLM's response.
+	const startTime = Date.now();
 	let response = await model.complete(chat, options?.gptOptions);
+	const responseTime = Date.now() - startTime;
 	if (verbose) {
 		logChatMessage(response, model);
 	}
@@ -138,7 +140,9 @@ export const gameLoop = async <
 		}
 		chat.push({ role: "user", content: turnPrompt });
 
+		const turnStartTime = Date.now();
 		response = await model.complete(chat, options?.gptOptions);
+		const turnResponseTime = Date.now() - turnStartTime;
 		if (verbose) {
 			logChatMessage(response, model);
 		}
@@ -155,8 +159,8 @@ export const gameLoop = async <
 		state = await game.updateState(state, parsedTurn);
 		status = await game.evaluateStatus(state);
 
-		if (options?.delay) {
-			await sleep(options.delay);
+		if (options?.delay && turnResponseTime < options.delay) {
+			await sleep(options.delay - turnResponseTime);
 		}
 	}
 
@@ -191,7 +195,7 @@ export const multiplayerGameLoop = async <
 ) => {
 	const chats: ChatMessage[][] = models.map(() => []);
 	let status = GameStatus.Ongoing;
-	let state = game.initializeState(stateOptions);
+	let state = await game.initializeState(stateOptions);
 
 	// Loop until the game status is not ongoing.
 	while (status === GameStatus.Ongoing) {
@@ -235,7 +239,9 @@ export const multiplayerGameLoop = async <
 			// Determine which options to use for this player
 			const playerOptions = options && options?.modelOptions?.[player];
 
+			const playerStartTime = Date.now();
 			const response = await model.complete(chats[player], playerOptions);
+			const playerResponseTime = Date.now() - playerStartTime;
 			logChatMessage(response, model);
 			chats[player].push(response);
 
@@ -299,7 +305,7 @@ export async function adversarialGameLoop<
 	// --- Phase 1: Generator Phase ---
 	const genChat: ChatMessage[] = [];
 	const genVerbose = !(options && options.quiet);
-	let state = generatorGame.initializeState(generatorParams);
+	let state = await generatorGame.initializeState(generatorParams);
 
 	// Send the initial prompt from the generator game.
 	const genInitialPrompt = typeof generatorGame.prompts.first === "string"
@@ -311,10 +317,12 @@ export async function adversarialGameLoop<
 	genChat.push({ role: "user", content: genInitialPrompt });
 
 	// Run the generator loop until a valid challenge is produced.
+	const genStartTime = Date.now();
 	let generatorResponse = await generatorModel.complete(
 		genChat,
 		options?.gptOptions,
 	);
+	const genResponseTime = Date.now() - genStartTime;
 	if (genVerbose) {
 		logChatMessage(generatorResponse, generatorModel);
 	}
@@ -334,10 +342,12 @@ export async function adversarialGameLoop<
 			role: "user",
 		});
 
+		const genLoopStartTime = Date.now();
 		generatorResponse = await generatorModel.complete(
 			genChat,
 			options?.gptOptions,
 		);
+		const genLoopResponseTime = Date.now() - genLoopStartTime;
 		genChat.push(generatorResponse);
 		console.log("generator_chat", generatorResponse.content);
 
@@ -359,10 +369,12 @@ export async function adversarialGameLoop<
 		}];
 
 		console.log(solChat);
+		const solStartTime = Date.now();
 		const solverResponse = await solverModel.complete(
 			solChat,
 			options?.gptOptions,
 		);
+		const solResponseTime = Date.now() - solStartTime;
 		solChat.push(solverResponse);
 		console.log("solver_chat", solverResponse.content);
 
@@ -370,6 +382,14 @@ export async function adversarialGameLoop<
 
 		//3. Check correct
 		generatorStatus = await solverGame.evaluateStatus(state);
+		
+		// Apply delay if needed and response time was shorter than delay
+		if (options?.delay) {
+			const totalResponseTime = genLoopResponseTime + solResponseTime;
+			if (totalResponseTime < options.delay) {
+				await sleep(options.delay - totalResponseTime);
+			}
+		}
 	}
 
 	// Optionally write logs for both phases.

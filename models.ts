@@ -448,7 +448,7 @@ class Human extends LanguageModel {
 	/**
 	 * Implementation of the abstract stream method required by LanguageModel.
 	 * Since human interaction isn't streaming, this simply returns the complete response.
-	 * 
+	 *
 	 * @param messages - An array of chat messages (ignored in this implementation).
 	 * @returns An async iterable that yields a single message chunk.
 	 */
@@ -459,7 +459,7 @@ class Human extends LanguageModel {
 		const response = this.complete(messages);
 		yield {
 			content: response.content,
-			delta: { content: response.content }
+			delta: { content: response.content },
 		};
 	}
 }
