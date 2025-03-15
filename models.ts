@@ -71,6 +71,10 @@ export type GPTReasoningOptions = GPTOptions & {
  */
 export type AnthropicOptions = {
 	temperature?: number;
+	thinking?: {
+		type: "enabled",
+        budget_tokens: number
+	}
 	top_k?: number;
 	top_p?: number;
 	system?: string;
@@ -343,6 +347,7 @@ export class AnthropicModel extends LanguageModel {
 				this.name,
 			);
 		}
+		console.log(chatResponse);
 		return {
 			role: "assistant",
 			content: chatResponse.content[0].text,
@@ -481,15 +486,21 @@ export async function streamToConsole(
 	messages: ChatMessage[],
 	options?: GPTOptions | AnthropicOptions,
 ) {
+	let result = "";
+
 	if (!model.stream) {
 		throw new Error(`Model ${model.name} does not support streaming`);
 	}
 
 	const stream = model.stream(messages, options);
 	for await (const chunk of stream) {
-		Deno.stdout.write(new TextEncoder().encode(chunk.delta?.content || chunk.content || ""));
+		const content = chunk.delta?.content || chunk.content || "";
+		Deno.stdout.write(new TextEncoder().encode(content));
+		result += content;
 	}
 	Deno.stdout.write(new TextEncoder().encode("\n"));
+
+	return result;
 }
 
 /**

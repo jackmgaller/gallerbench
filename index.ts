@@ -26,10 +26,63 @@ if (false) {
 	const resp = await model.complete([
 		{
 			content:
-				"My girlfriend and I just started watching Twin Peaks. I like pretentious movies and TV shows. What's some stuff I should look for to enhance my viewing experience, you can give very light spoilers if you need to.",
+				"How are hotel star ratings determined in Japan? Answer concisely.",
 			role: "user",
 		},
 	]);
+
+	console.log(resp.content);
+}
+
+if (false) {
+	const model = models[LanguageModelName["GPT-4.5 preview"]];
+
+	console.log("Streaming " + model.name + " response...");
+	const prompt = "Tell me about the TV show Eyewitness from the 90's. What's up with the museum?";
+	const content = await streamToConsole(model, [
+		{
+			content: prompt,
+			role: "user",
+		},
+	]);
+
+	await Deno.writeTextFile("data/" + model.name + "-conversation.json", JSON.stringify([
+		{
+			role: "user",
+			content: prompt,
+		},
+		{
+			role: "assistant",
+			content,
+		}
+	], null, "\t"));
+}
+
+if (true) {
+	const model = models[LanguageModelName["GPT-4.5 preview"]];
+
+	console.log("Streaming " + model.name + " response...");
+
+	const content = await streamToConsole(model, JSON.parse(await Deno.readTextFile("data/" + model.name + "-conversation.json")));
+
+}
+
+if (false) {
+	const model = models[LanguageModelName["Claude 3.7 Sonnet"]];
+
+	console.log("Waiting for " + model.name + " response...");
+	const resp = await model.complete([
+		{
+			content:
+				"My girlfriend and I just started watching Twin Peaks. I like pretentious movies and TV shows. What's some stuff I should look for to enhance my viewing experience, you can give very light spoilers if you need to.",
+			role: "user",
+		},
+	], {
+		thinking: {
+			type: "enabled",
+			budget_tokens: 2048,
+		}
+	});
 
 	console.log(resp.content);
 }
@@ -73,7 +126,7 @@ if (false) {
 	);
 }
 
-if (true) {
+if (false) {
 	// Pass false to use cache, true to skip cache
 	const skipCache = false;
 	
