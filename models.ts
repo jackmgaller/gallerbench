@@ -72,9 +72,9 @@ export type GPTReasoningOptions = GPTOptions & {
 export type AnthropicOptions = {
 	temperature?: number;
 	thinking?: {
-		type: "enabled",
-        budget_tokens: number
-	}
+		type: "enabled";
+		budget_tokens: number;
+	};
 	top_k?: number;
 	top_p?: number;
 	system?: string;
@@ -267,7 +267,7 @@ export class OpenAIReasoningModel extends OpenAIModel {
 			finalOptions.reasoning_effort = this.defaultReasoningEffort;
 		}
 
-		const response = await fetch(
+		let response = await fetch(
 			"https://api.openai.com/v1/chat/completions",
 			{
 				body: JSON.stringify({
@@ -282,6 +282,36 @@ export class OpenAIReasoningModel extends OpenAIModel {
 				},
 			},
 		);
+
+		if (!response.ok) {
+			console.log(await response.text());
+			console.log("");
+			let tries = 5;
+
+			while (tries > 0 && !response.ok) {
+				response = await fetch(
+					"https://api.openai.com/v1/chat/completions",
+					{
+						body: JSON.stringify({
+							model: this.name,
+							messages,
+							...finalOptions,
+						}),
+						method: "POST",
+						headers: {
+							"Authorization": "Bearer " + OPENAI_API_KEY,
+							"Content-Type": "application/json",
+						},
+					},
+				);
+				tries--;
+			}
+
+			if (tries === 0) {
+				throw new Error("Failed 5 times!");
+			}
+		}
+
 		const chatResponse: OpenAIChatResponse = await response.json();
 		if (!chatResponse.choices) {
 			const errorMessage = (chatResponse as any).error?.message ||

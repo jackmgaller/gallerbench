@@ -25,8 +25,7 @@ if (false) {
 	console.log("Waiting for " + model.name + " response...");
 	const resp = await model.complete([
 		{
-			content:
-				"How are hotel star ratings determined in Japan? Answer concisely.",
+			content: "How are hotel star ratings determined in Japan? Answer concisely.",
 			role: "user",
 		},
 	]);
@@ -46,16 +45,23 @@ if (false) {
 		},
 	]);
 
-	await Deno.writeTextFile("data/" + model.name + "-conversation.json", JSON.stringify([
-		{
-			role: "user",
-			content: prompt,
-		},
-		{
-			role: "assistant",
-			content,
-		}
-	], null, "\t"));
+	await Deno.writeTextFile(
+		"data/" + model.name + "-conversation.json",
+		JSON.stringify(
+			[
+				{
+					role: "user",
+					content: prompt,
+				},
+				{
+					role: "assistant",
+					content,
+				},
+			],
+			null,
+			"\t",
+		),
+	);
 }
 
 if (true) {
@@ -63,8 +69,12 @@ if (true) {
 
 	console.log("Streaming " + model.name + " response...");
 
-	const content = await streamToConsole(model, JSON.parse(await Deno.readTextFile("data/" + model.name + "-conversation.json")));
-
+	const content = await streamToConsole(
+		model,
+		JSON.parse(
+			await Deno.readTextFile("data/" + model.name + "-conversation.json"),
+		),
+	);
 }
 
 if (false) {
@@ -81,7 +91,7 @@ if (false) {
 		thinking: {
 			type: "enabled",
 			budget_tokens: 2048,
-		}
+		},
 	});
 
 	console.log(resp.content);
@@ -129,11 +139,15 @@ if (false) {
 if (false) {
 	// Pass false to use cache, true to skip cache
 	const skipCache = false;
-	
+
 	await benchmarkPoliticalCompass(
-		[models[LanguageModelName["Claude 3.5 Haiku"]], models[LanguageModelName["Claude 3.7 Sonnet"]],models[LanguageModelName["o3 mini low"]]],
+		[
+			models[LanguageModelName["Claude 3.5 Haiku"]],
+			models[LanguageModelName["Claude 3.7 Sonnet"]],
+			models[LanguageModelName["o3 mini low"]],
+		],
 		"data/Political Compass/your_political_beliefs_transcript.txt",
 		"data/Political Compass/Jack.json",
-		skipCache
+		skipCache,
 	);
 }
