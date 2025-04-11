@@ -52,7 +52,7 @@ function generateCacheKey(modelName: string, userBeliefs: string): string {
 	const data = encoder.encode(`${modelName}:${userBeliefs}`);
 	const hashBuffer = crypto.subtle.digestSync("SHA-256", data);
 	const hashArray = Array.from(new Uint8Array(hashBuffer));
-	const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+	const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 	return hashHex.substring(0, 8);
 }
 
@@ -61,7 +61,7 @@ function generateCacheKey(modelName: string, userBeliefs: string): string {
  */
 const PoliticalCompassCache = {
 	cachePath: "cache/politicalCompass.json",
-	
+
 	/**
 	 * Load all cached results
 	 * @returns Record of cached results by key
@@ -74,7 +74,7 @@ const PoliticalCompassCache = {
 				// Cache file doesn't exist yet
 				return {};
 			}
-			
+
 			const cacheContent = Deno.readTextFileSync(this.cachePath);
 			return JSON.parse(cacheContent);
 		} catch (error) {
@@ -82,7 +82,7 @@ const PoliticalCompassCache = {
 			return {};
 		}
 	},
-	
+
 	/**
 	 * Save the entire cache
 	 * @param cache The cache object to save
@@ -95,13 +95,13 @@ const PoliticalCompassCache = {
 			} catch {
 				// Directory exists, that's fine
 			}
-			
+
 			Deno.writeTextFileSync(this.cachePath, JSON.stringify(cache, null, 2));
 		} catch (error) {
 			console.error("Error saving cache:", error);
 		}
 	},
-	
+
 	/**
 	 * Get a cached result if it exists
 	 * @param modelName The model name
@@ -113,7 +113,7 @@ const PoliticalCompassCache = {
 		const key = generateCacheKey(modelName, userBeliefs);
 		return cache[key] || null;
 	},
-	
+
 	/**
 	 * Store a result in the cache
 	 * @param modelName The model name
@@ -125,8 +125,8 @@ const PoliticalCompassCache = {
 		const key = generateCacheKey(modelName, userBeliefs);
 		cache[key] = result;
 		this.saveCache(cache);
-	}
-}
+	},
+};
 
 /**
  * A game that tests how well an LLM can infer a person's political compass answers
@@ -197,29 +197,27 @@ If the response doesn't contain one of these exact answers, select the one that 
 		state.responses.push(parsedAnswer);
 
 		const correctAnswer = state.correctAnswers[state.currentQuestionIndex].answer;
-		
+
 		// Map answers to numerical values
 		const answerValues: Record<string, number> = {
 			"strongly disagree": -1,
 			"disagree": -0.5,
 			"agree": 0.5,
-			"strongly agree": 1
+			"strongly agree": 1,
 		};
-		
+
 		// Calculate difference between model answer and correct answer
 		const modelValue = answerValues[parsedAnswer.toLowerCase()];
 		const correctValue = answerValues[correctAnswer.toLowerCase()];
-		
+
 		if (modelValue !== undefined && correctValue !== undefined) {
 			// Perfect match
 			if (modelValue === correctValue) {
 				state.score += 1;
-			}
-			// Partial match (only off by one level)
+			} // Partial match (only off by one level)
 			else if (Math.abs(modelValue - correctValue) === 0.5) {
 				state.score += 0.5;
-			}
-			// Close but not perfect (agree vs strongly disagree or vice versa)
+			} // Close but not perfect (agree vs strongly disagree or vice versa)
 			else if (Math.abs(modelValue - correctValue) === 1.5) {
 				state.score += 0.25;
 			}
@@ -330,13 +328,13 @@ export async function benchmarkPoliticalCompass(
 		"strongly disagree": -1,
 		"disagree": -0.5,
 		"agree": 0.5,
-		"strongly agree": 1
+		"strongly agree": 1,
 	};
 
 	// Test each model
 	for (const model of modelsToTest) {
 		console.log(`Testing model: ${model.name}`);
-		
+
 		let responses: string[] = [];
 		let totalPoints = 0;
 		let fromCache = false;
@@ -361,38 +359,36 @@ export async function benchmarkPoliticalCompass(
 				gameParams,
 				{
 					delay: 500,
-				}
+				},
 			);
 
 			// Get responses from game result
 			responses = gameResult.state.responses;
-			
+
 			// Calculate score
 			totalPoints = 0;
 			const maxPossiblePoints = responses.length;
-			
+
 			// Compare model responses with correct answers
 			for (let i = 0; i < responses.length; i++) {
 				const modelValue = answerValues[responses[i].toLowerCase()];
 				const correctValue = answerValues[correctAnswers[i].answer.toLowerCase()];
-				
+
 				if (modelValue !== undefined && correctValue !== undefined) {
 					// Perfect match
 					if (modelValue === correctValue) {
 						console.log("Perfect match");
 						totalPoints += 1;
-					}
-					// Partial match (only off by one level)
+					} // Partial match (only off by one level)
 					else if (Math.abs(modelValue - correctValue) === 0.5) {
 						console.log("Partial match");
 						totalPoints += 0.5;
-					}
-					// Close but not perfect (agree vs strongly disagree or vice versa)
+					} // Close but not perfect (agree vs strongly disagree or vice versa)
 					else if (Math.abs(modelValue - correctValue) === 1.5) {
 						console.log("Not perfect");
 						totalPoints += 0.25;
 					} else {
-						console.log("Complete miss")
+						console.log("Complete miss");
 					}
 					// Complete opposite (no points)
 				}
@@ -402,7 +398,7 @@ export async function benchmarkPoliticalCompass(
 			PoliticalCompassCache.set(model.name, userBeliefs, {
 				model: model.name,
 				responses,
-				score: totalPoints
+				score: totalPoints,
 			});
 		}
 
@@ -428,7 +424,7 @@ export async function benchmarkPoliticalCompass(
 					if (Math.abs(mValue - cValue) === 0.5) return "close";
 					if (Math.abs(mValue - cValue) === 1.5) return "somewhat opposite";
 					return "opposite";
-				})()
+				})(),
 			})),
 		});
 

@@ -125,9 +125,7 @@ export const gameLoop = async <
 	}
 	chat.push(response);
 
-	const parsedFirst = game.answerParserPrompt
-		? await parseAnswer(game, state, response.content, options?.gptOptions)
-		: response.content;
+	const parsedFirst = game.answerParserPrompt ? await parseAnswer(game, state, response.content, options?.gptOptions) : response.content;
 	state = await game.updateState(state, parsedFirst);
 
 	let status: GameStatus = await game.evaluateStatus(state);
@@ -218,9 +216,7 @@ export const multiplayerGameLoop = async <
 
 			// Use the appropriate prompt.
 			if (chats[player].length === 0) {
-				const firstPrompt = typeof game.prompts.first === "string"
-					? game.prompts.first
-					: game.prompts.first(state, player);
+				const firstPrompt = typeof game.prompts.first === "string" ? game.prompts.first : game.prompts.first(state, player);
 				console.log(
 					`%c[PLAYER ${player + 1} PROMPT]: ${firstPrompt}`,
 					"color: blue;",
@@ -357,9 +353,7 @@ export async function adversarialGameLoop<
 		);
 
 		//2. Solver
-		const solTurnPrompt = typeof solverGame.prompts.turn === "string"
-			? solverGame.prompts.turn
-			: solverGame.prompts.turn(state);
+		const solTurnPrompt = typeof solverGame.prompts.turn === "string" ? solverGame.prompts.turn : solverGame.prompts.turn(state);
 
 		//We re-initialize solver chat every time
 		//TODO make option
@@ -382,7 +376,7 @@ export async function adversarialGameLoop<
 
 		//3. Check correct
 		generatorStatus = await solverGame.evaluateStatus(state);
-		
+
 		// Apply delay if needed and response time was shorter than delay
 		if (options?.delay) {
 			const totalResponseTime = genLoopResponseTime + solResponseTime;

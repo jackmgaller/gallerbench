@@ -1,4 +1,5 @@
 // File: games/aidanbench.ts
+import "jsr:@std/dotenv/load";
 
 import { LanguageModelName, models } from "../models.ts";
 import { Game, GameStatus } from "../types.ts";

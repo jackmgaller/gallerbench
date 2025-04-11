@@ -110,8 +110,7 @@ Your snake’s head is at (${snake.body[0].x}, ${snake.body[0].y}).
 Enter your move (up, down, left, or right):`;
 		},
 	},
-	answerParserPrompt:
-		"Extract the move from the response. Return exactly one of: up, down, left, or right, with no extra characters.",
+	answerParserPrompt: "Extract the move from the response. Return exactly one of: up, down, left, or right, with no extra characters.",
 	initializeState: (playersCount: number) => {
 		const boardWidth = 10;
 		const boardHeight = 10;

@@ -1,10 +1,10 @@
+import { sortObjectByValues } from "gallerlib/utils.ts";
 import { AitaCache } from "../cache/aitaCache.ts";
 import { LanguageModelName, models } from "../models.ts";
-import { shuffle } from "../utils/shuffle.ts";
 
 // Load and parse AITA questions JSON file.
 const aitaQuestionsText = await Deno.readTextFile(
-	"/Users/gallerdude/Desktop/Gallerbench/data/aita/aita.json",
+	"/Users/gallerdude/Desktop/Gallerapps/apps/Gallerbench/data/aita/aita.json",
 );
 const aitaData = JSON.parse(aitaQuestionsText) as AITAEntry[];
 
@@ -43,6 +43,8 @@ export type AITAEntry = {
 	toxicity_confidence_score: number;
 };
 
+type AITAClassification = "YTA" | "NTA" | "ESH" | "NAH" | "Invalid";
+
 export type AITAJudgementEntry = {
 	index: number;
 	entry: string;
@@ -53,8 +55,11 @@ export type AITAJudgementEntry = {
 			content: string;
 		}[];
 	};
-	reddit_classifications?: string[];
-	ai_classifications?: { model: string; classification: string }[];
+	reddit_classifications?: AITAClassification[];
+	ai_classifications?: {
+		model: string;
+		classification: AITAClassification;
+	}[];
 };
 
 // ======================
@@ -72,7 +77,7 @@ ${aita.submission_text}`;
 /**
  * Helper function to classify a judgement response using the classification model.
  */
-async function classifyJudgement(judgement: string): Promise<string> {
+async function classifyJudgement(judgement: string) {
 	const prompt =
 		`We are looking at AITA (Am I The Asshole) posts, and how people judge them in response. The possible responses are "YTA", "NTA", "NAH", "ESH". 
 
@@ -82,7 +87,7 @@ Judgement: ${judgement}`;
 	const response = await models[LanguageModelName["o3 mini low"]].complete([
 		{ role: "user", content: prompt },
 	]);
-	return response.content.trim();
+	return response.content.trim() as "YTA" | "NTA" | "NAH" | "ESH" | "Invalid";
 }
 
 // Allowed classifications for validation.
@@ -104,7 +109,6 @@ const ALLOWED_CLASSIFICATIONS = ["YTA", "NTA", "NAH", "ESH"] as const;
  *
  * @param start - Starting index (default 0)
  * @param count - Number of entries to process (default 1000)
- * @param useShuffle - Whether to shuffle the entries before processing (default false)
  * @param outputFile - Optional output file name; if not provided one is generated.
  */
 export async function processAITAJudgements(
@@ -120,6 +124,7 @@ export async function processAITAJudgements(
 		LanguageModelName["GPT-4o mini"],
 		LanguageModelName["GPT-4o"],
 		LanguageModelName["GPT-4.5 preview"],
+		LanguageModelName["o3 mini"],
 	];
 	const fileName = outputFile ||
 		`data/aita/aita_judge_combined_${
@@ -137,6 +142,7 @@ export async function processAITAJudgements(
 			postText,
 			languageModels.map((lm) => LanguageModelName[lm]),
 		);
+
 		if (cacheResult !== null) {
 			console.log(`CACHE HIT ${i + 1}`);
 			results.push(cacheResult as AITAJudgementEntry);
@@ -195,7 +201,7 @@ export async function processAITAJudgements(
  * For each entry, this function classifies both Reddit and AI judgements using a language model.
  * It writes progress to an output file.
  */
-export async function classifyHumanRatings(
+export async function classifyRatings(
 	inputFile: string,
 	outputFile?: string,
 ): Promise<void> {
@@ -211,7 +217,7 @@ export async function classifyHumanRatings(
 	for (const entry of entries) {
 		// Process Reddit judgements if not already classified.
 		if (!entry.reddit_classifications) {
-			const redditClassifications: string[] = [];
+			const redditClassifications: AITAClassification[] = [];
 			let count = 1;
 			for (const judgement of entry.judgements.reddit) {
 				console.log(
@@ -238,7 +244,7 @@ export async function classifyHumanRatings(
 
 		// Process AI judgements if not already classified.
 		if (!entry.ai_classifications) {
-			const aiClassifications: { model: string; classification: string }[] = [];
+			const aiClassifications: { model: string; classification: "YTA" | "NTA" | "NAH" | "ESH" | "Invalid" }[] = [];
 			for (const aiResponse of entry.judgements.ai) {
 				console.log(
 					`Processing AI judgement from model ${aiResponse.model} for entry ${entry.index}`,
@@ -272,16 +278,21 @@ export function computeAgreementAccuracy(
 	data: AITAJudgementEntry[],
 ): Record<string, number> {
 	const results: Record<string, number> = {};
+	let n = 0;
 
 	data.forEach((entry) => {
-		entry.ai_classifications!.forEach(({ model, classification }) => {
-			entry.reddit_classifications!.forEach((redditClassification) => {
-				if (classification === redditClassification) {
-					results[model] = (results[model] || 0) + 1;
-				}
+		if (entry.ai_classifications) {
+			n++;
+			entry.ai_classifications.forEach(({ model, classification }) => {
+				entry.reddit_classifications!.forEach((redditClassification) => {
+					if (classification === redditClassification) {
+						results[model] = (results[model] || 0) + 1;
+					}
+				});
 			});
-		});
+		}
 	});
+	console.log({ n });
 	return results;
 }
 
@@ -331,59 +342,75 @@ export function computeMajorityVoteAccuracy(
 }
 
 const calculateUnanimousHumans = (data: AITAJudgementEntry[]) => {
-    let unanimous = 0;
+	let unanimous = 0;
 
-    data.forEach((entry) => {
-        if (entry.reddit_classifications!.every((j) => j === entry.reddit_classifications![0])) {
-            unanimous++;
-        }
-    });
+	data.forEach((entry) => {
+		if (entry.reddit_classifications!.every((j) => j === entry.reddit_classifications![0])) {
+			unanimous++;
+		}
+	});
 
-    return unanimous;
-}
+	return unanimous;
+};
 
 const calculateUnanimousLLMs = (data: AITAJudgementEntry[]) => {
-    let unanimous = 0;
+	let unanimous = 0;
 
-    data.forEach((entry) => {
-        if (entry.ai_classifications!.every((j) => j.classification === entry.ai_classifications![0].classification)) {
-            unanimous++;
-        }
-    });
+	data.forEach((entry) => {
+		if (entry.ai_classifications!.every((j) => j.classification === entry.ai_classifications![0].classification)) {
+			unanimous++;
+		}
+	});
 
-    return unanimous;
-}
+	return unanimous;
+};
 
 // ======================
 // Execution & Logging
 // ======================
+
+// await processAITAJudgements();
+
+// await classifyRatings("/Users/gallerdude/Desktop/Gallerapps/apps/Gallerbench/data/aita/aita-04-11T03:16:29-classified.json",
+// 	"/Users/gallerdude/Desktop/Gallerapps/apps/Gallerbench/data/aita/aita-04-11T03:16:29-classified-2.json"
+// )
+
 const allData = JSON.parse(
 	await Deno.readTextFile(
-		"/Users/gallerdude/Desktop/Gallerbench/data/aita/aita_judge_classified_2025-03-18T15:08:19.json",
+		"/Users/gallerdude/Desktop/Gallerapps/apps/Gallerbench/data/aita/aita-04-11T03:16:29-classified-2.json",
 	),
 ) as AITAJudgementEntry[];
 
 const agreementResults = await computeAgreementAccuracy(allData);
-const normalizedAgreementResult: Record<string, string> = Object.fromEntries(
+let normalizedAgreementResult: Record<string, string> = Object.fromEntries(
 	Object.entries(agreementResults).map(([k, v]) => [
 		k,
 		((v / 5000) * 100).toFixed(2) + "%",
 	]),
 );
+
+normalizedAgreementResult = sortObjectByValues(normalizedAgreementResult, (a, b) => {
+	return Number.parseFloat(a) - Number.parseFloat(b);
+});
+
 console.log("Agreement Accuracy:", normalizedAgreementResult);
 
 const majorityVoteResults = computeMajorityVoteAccuracy(allData);
-const normalizedMajorityVoteResult: Record<string, string> = Object.fromEntries(
+let normalizedMajorityVoteResult: Record<string, string> = Object.fromEntries(
 	Object.entries(majorityVoteResults).map(([k, v]) => [
 		k,
-		(v).toFixed(2) + "%",
+		v.toFixed(2) + "%",
 	]),
 );
 
+normalizedMajorityVoteResult = sortObjectByValues(normalizedMajorityVoteResult, (a, b) => {
+	return Number.parseFloat(a) - Number.parseFloat(b);
+});
+
 console.log("Majority‐Vote Accuracy:", normalizedMajorityVoteResult);
 
-console.log("Unanimous Humans", calculateUnanimousHumans(allData))
-console.log("Unanimous LLMs", calculateUnanimousLLMs(allData))
+console.log("Unanimous Humans", calculateUnanimousHumans(allData));
+console.log("Unanimous LLMs", calculateUnanimousLLMs(allData));
 
 /**
  * -----------------------------------------------------------------------------

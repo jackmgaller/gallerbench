@@ -28,8 +28,7 @@ export const equationGeneratorGame: Game<EquationState, null> = {
 	},
 };
 
-const equationSolverPrompt = (state: EquationState) =>
-	`Solve the following math problem and provide only the result:\n\n${state.equation}`;
+const equationSolverPrompt = (state: EquationState) => `Solve the following math problem and provide only the result:\n\n${state.equation}`;
 
 export const equationSolverGame: Game<EquationState, string> = {
 	name: "EquationSolverGame",

@@ -75,9 +75,7 @@ export const ticTacToeGame: MultiplayerGame<TicTacToeState> = {
 
 			prompt += `The board looks like this:\n\n${ticTacToeBoardToString(state.board)}\n\n;`;
 
-			prompt += `Where would you like to place your first ${
-				isO ? "O" : "X"
-			} piece? Please tell me one of the following: `;
+			prompt += `Where would you like to place your first ${isO ? "O" : "X"} piece? Please tell me one of the following: `;
 
 			prompt +=
 				`"top left", "top center", "top right", "middle left", "middle center", "middle right", "bottom left", "bottom middle", or "bottom right"`;
@@ -92,9 +90,7 @@ export const ticTacToeGame: MultiplayerGame<TicTacToeState> = {
 
 			prompt += `${ticTacToeBoardToString(state.board)}\n\n`;
 
-			prompt += `Where would you like to place your next ${
-				isO ? "O" : "X"
-			} piece? Tell me the move in this exact format: `;
+			prompt += `Where would you like to place your next ${isO ? "O" : "X"} piece? Tell me the move in this exact format: `;
 
 			prompt +=
 				`"top left", "top center", "top right", "middle left", "middle center", "middle right", "bottom left", "bottom middle", or "bottom right"`;

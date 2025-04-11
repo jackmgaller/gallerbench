@@ -2,5 +2,7 @@
 .vscode
 .DS_Store
 out/secret/
-cache
+!cache
+/cache/*
+!/cache/cache.ts
 data/aita/
