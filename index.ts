@@ -1,6 +1,7 @@
 import { benchmarkAidanbench } from "./benchmarkGame.ts";
 import { adversarialGameLoop, gameLoop, multiplayerGameLoop } from "./gameLoop.ts";
 import { connect4Game } from "./games/connectFour.ts";
+import { pokemonBattleGame } from "./games/pokemonBattle.ts";
 import { equationGeneratorGame, equationSolverGame } from "./games/equationGame.ts";
 import { benchmarkPoliticalCompass } from "./games/politicalCompass.ts";
 import { wordleGame } from "./games/wordle.ts";
@@ -126,14 +127,25 @@ if (false) {
 }
 
 if (false) {
-	const run = await multiplayerGameLoop(
-		connect4Game,
-		[
-			models[LanguageModelName["o3 mini high"]],
-			models[LanguageModelName["o3 mini high"]],
-		],
-		null,
-	);
+        const run = await multiplayerGameLoop(
+                connect4Game,
+                [
+                        models[LanguageModelName["o3 mini high"]],
+                        models[LanguageModelName["o3 mini high"]],
+                ],
+                null,
+        );
+}
+
+if (false) {
+        const run = await multiplayerGameLoop(
+                pokemonBattleGame,
+                [
+                        models[LanguageModelName["o3 mini high"]],
+                        models[LanguageModelName["o3 mini high"]],
+                ],
+                { teamSize: 3 },
+        );
 }
 
 if (false) {
